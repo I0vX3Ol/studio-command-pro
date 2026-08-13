@@ -119,7 +119,7 @@ function EquipmentPage() {
               ["EQ-3391", "Hydraulic hose repair", "Jun 30 · $620"],
               ["EQ-4407", "Coolant flush", "Jun 12 · $310"],
             ].map(([id, desc, meta]) => (
-              <li key={id + desc} className="px-6 py-4">
+              <li key={`${id}-${desc}`} className="px-6 py-4">
                 <p className="num text-xs text-muted-foreground">{id}</p>
                 <p className="text-sm font-medium">{desc}</p>
                 <p className="text-xs text-muted-foreground">{meta}</p>

@@ -16,6 +16,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppCrmRouteImport } from './routes/app.crm'
+import { Route as AppEquipmentRouteImport } from './routes/app.equipment'
 import { Route as AppEstimatingRouteImport } from './routes/app.estimating'
 import { Route as AppProjectsRouteImport } from './routes/app.projects'
 
@@ -54,6 +55,11 @@ const AppCrmRoute = AppCrmRouteImport.update({
   path: '/crm',
   getParentRoute: () => AppRoute,
 } as any)
+const AppEquipmentRoute = AppEquipmentRouteImport.update({
+  id: '/equipment',
+  path: '/equipment',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppEstimatingRoute = AppEstimatingRouteImport.update({
   id: '/estimating',
   path: '/estimating',
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/app/crm': typeof AppCrmRoute
+  '/app/equipment': typeof AppEquipmentRoute
   '/app/estimating': typeof AppEstimatingRoute
   '/app/projects': typeof AppProjectsRoute
   '/app/': typeof AppIndexRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/app/crm': typeof AppCrmRoute
+  '/app/equipment': typeof AppEquipmentRoute
   '/app/estimating': typeof AppEstimatingRoute
   '/app/projects': typeof AppProjectsRoute
   '/app': typeof AppIndexRoute
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/app/crm': typeof AppCrmRoute
+  '/app/equipment': typeof AppEquipmentRoute
   '/app/estimating': typeof AppEstimatingRoute
   '/app/projects': typeof AppProjectsRoute
   '/app/': typeof AppIndexRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/app/crm'
+    | '/app/equipment'
     | '/app/estimating'
     | '/app/projects'
     | '/app/'
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/app/crm'
+    | '/app/equipment'
     | '/app/estimating'
     | '/app/projects'
     | '/app'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/app/crm'
+    | '/app/equipment'
     | '/app/estimating'
     | '/app/projects'
     | '/app/'
@@ -192,6 +204,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCrmRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/equipment': {
+      id: '/app/equipment'
+      path: '/equipment'
+      fullPath: '/app/equipment'
+      preLoaderRoute: typeof AppEquipmentRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/estimating': {
       id: '/app/estimating'
       path: '/estimating'
@@ -211,6 +230,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppCrmRoute: typeof AppCrmRoute
+  AppEquipmentRoute: typeof AppEquipmentRoute
   AppEstimatingRoute: typeof AppEstimatingRoute
   AppProjectsRoute: typeof AppProjectsRoute
   AppIndexRoute: typeof AppIndexRoute
@@ -218,6 +238,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppCrmRoute: AppCrmRoute,
+  AppEquipmentRoute: AppEquipmentRoute,
   AppEstimatingRoute: AppEstimatingRoute,
   AppProjectsRoute: AppProjectsRoute,
   AppIndexRoute: AppIndexRoute,
