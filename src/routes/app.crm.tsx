@@ -35,7 +35,7 @@ export const Route = createFileRoute("/app/crm")({
 });
 
 function CRMPage() {
-  const [selectedId, setSelectedId] = useState(customers[0].id);
+  const [selectedId, setSelectedId] = useState(customers[0]!.id);
   const [query, setQuery] = useState("");
   const selected = customers.find((c) => c.id === selectedId)!;
   const filtered = customers.filter((c) => c.name.toLowerCase().includes(query.toLowerCase()));
