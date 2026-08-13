@@ -16,6 +16,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppCrmRouteImport } from './routes/app.crm'
+import { Route as AppEstimatingRouteImport } from './routes/app.estimating'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -52,6 +53,11 @@ const AppCrmRoute = AppCrmRouteImport.update({
   path: '/crm',
   getParentRoute: () => AppRoute,
 } as any)
+const AppEstimatingRoute = AppEstimatingRouteImport.update({
+  id: '/estimating',
+  path: '/estimating',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/app/crm': typeof AppCrmRoute
+  '/app/estimating': typeof AppEstimatingRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/app/crm': typeof AppCrmRoute
+  '/app/estimating': typeof AppEstimatingRoute
   '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/app/crm': typeof AppCrmRoute
+  '/app/estimating': typeof AppEstimatingRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
@@ -89,9 +98,17 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/app/crm'
+    | '/app/estimating'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/forgot-password' | '/login' | '/signup' | '/app/crm' | '/app'
+  to:
+    | '/'
+    | '/forgot-password'
+    | '/login'
+    | '/signup'
+    | '/app/crm'
+    | '/app/estimating'
+    | '/app'
   id:
     | '__root__'
     | '/'
@@ -100,6 +117,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/app/crm'
+    | '/app/estimating'
     | '/app/'
   fileRoutesById: FileRoutesById
 }
@@ -162,16 +180,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCrmRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/estimating': {
+      id: '/app/estimating'
+      path: '/estimating'
+      fullPath: '/app/estimating'
+      preLoaderRoute: typeof AppEstimatingRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
   AppCrmRoute: typeof AppCrmRoute
+  AppEstimatingRoute: typeof AppEstimatingRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppCrmRoute: AppCrmRoute,
+  AppEstimatingRoute: AppEstimatingRoute,
   AppIndexRoute: AppIndexRoute,
 }
 
