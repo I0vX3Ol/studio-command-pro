@@ -17,6 +17,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppCrmRouteImport } from './routes/app.crm'
 import { Route as AppEstimatingRouteImport } from './routes/app.estimating'
+import { Route as AppProjectsRouteImport } from './routes/app.projects'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,6 +59,11 @@ const AppEstimatingRoute = AppEstimatingRouteImport.update({
   path: '/estimating',
   getParentRoute: () => AppRoute,
 } as any)
+const AppProjectsRoute = AppProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/app/crm': typeof AppCrmRoute
   '/app/estimating': typeof AppEstimatingRoute
+  '/app/projects': typeof AppProjectsRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/app/crm': typeof AppCrmRoute
   '/app/estimating': typeof AppEstimatingRoute
+  '/app/projects': typeof AppProjectsRoute
   '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/app/crm': typeof AppCrmRoute
   '/app/estimating': typeof AppEstimatingRoute
+  '/app/projects': typeof AppProjectsRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/app/crm'
     | '/app/estimating'
+    | '/app/projects'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -108,6 +118,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/app/crm'
     | '/app/estimating'
+    | '/app/projects'
     | '/app'
   id:
     | '__root__'
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/app/crm'
     | '/app/estimating'
+    | '/app/projects'
     | '/app/'
   fileRoutesById: FileRoutesById
 }
@@ -187,18 +199,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEstimatingRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/projects': {
+      id: '/app/projects'
+      path: '/projects'
+      fullPath: '/app/projects'
+      preLoaderRoute: typeof AppProjectsRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
   AppCrmRoute: typeof AppCrmRoute
   AppEstimatingRoute: typeof AppEstimatingRoute
+  AppProjectsRoute: typeof AppProjectsRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppCrmRoute: AppCrmRoute,
   AppEstimatingRoute: AppEstimatingRoute,
+  AppProjectsRoute: AppProjectsRoute,
   AppIndexRoute: AppIndexRoute,
 }
 
