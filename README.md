@@ -1,41 +1,6 @@
 # BuildFlow AI Dashboard
 
-Connect this Lovable project to my existing GitHub repository:
-
-Repository: I0vX3Ol/buildflow-ai-dashboard
-Branch: main
-
-I want you to continue working on the existing application in that repository, not create a new application and not rebuild the website from scratch.
-
-First, inspect the existing repository and understand the current codebase, including:
-
-Existing React/TypeScript architecture
-
-Components and pages
-
-Routing
-
-Styling and design system
-
-Dependencies
-
-Existing functionality
-
-API integrations
-
-Environment variable requirements
-
-Existing database/backend integrations
-
-Current project structure
-
-Preserve all existing functionality and design unless I specifically instruct you to change something.
-
-Use the GitHub repository as the source of truth for the project. Any changes you make should be applied to the existing codebase and synchronized with the repository.
-
-Do not replace the existing project with a new starter template.
-
-If this Lovable account cannot directly connect to or access I0vX3Ol/buildflow-ai-dashboard, tell me exactly what GitHub permission or connection is required rather than creating a new project.        You are an award-winning team of product designers from Linear, Stripe, Notion, Vercel, Apple, and Airbnb.
+You are an award-winning team of product designers from Linear, Stripe, Notion, Vercel, Apple, and Airbnb.
 
 Design and build a premium SaaS web application called BuildFlow AI.
 
@@ -415,55 +380,11 @@ The product should feel like software that sells for $299–999 per month.
 
 Generate all pages, components, routing, mock data, navigation, responsive layouts, and polished UI so the application is immediately usable as a production-quality MVP.
 
-Today at 12:13 PM
-
-
-
-
-
-Build unsuccessful
-
-
-
-
-
-
-
-Lovable can fix this without using additional credits.
-
-I had to stop partway through — here's where things stand.
-
-Done so far
-
-Premium design system in src/styles.css: modern-minimal token set (no gradients), light + dark themes, soft/lift shadow tokens, glass and surface utilities, mono numerics, rise animation, reduced-motion support.
-
-Theme provider with persistence + ⌘\ toggle (src/lib/theme.tsx).
-
-Full mock dataset for the whole product (src/lib/mock-data.ts): customers, pipeline, projects, kanban, equipment, employees, invoices, expenses, estimates, activity, deadlines, integrations, analytics, AI answers.
-
-Shared components: PageHeader, StatCard, Section, EmptyState, nav config.
-
-Command palette (⌘K) with navigation + actions, and the persistent AI assistant panel (⌘J) with suggested prompts, skeleton "thinking" state, and contextual answers.
-
-App shell src/routes/app.tsx: sidebar with grouped nav, glass sticky topbar, search trigger, notifications, avatar menu, mobile drawer, skip link, animated page transitions.
-
-Dashboard src/routes/app.index.tsx: revenue vs. forecast area chart, completion line chart, KPI cards, weather widget, crew status, equipment utilization, recent activity, upcoming deadlines.
-
-Remaining (currently the build will fail until these exist)
-
-Child routes referenced by nav/palette: /app/crm, /app/estimating, /app/projects, /app/equipment, /app/team, /app/financials, /app/analytics, /app/portal, /app/integrations, /app/settings.
-
-Auth surface: landing page at / (still the template placeholder), /login, /signup, /forgot-password, 2FA + magic link.
-
-Wiring in __root.tsx: font <link> tags, theme init script, ThemeProvider, and the sonner <Toaster />.
-
-When you have credits again, tell me to continue and I'll finish those in the next pass.
-
 This project was built with [Lovable](https://lovable.dev).
 
 ## Build with Lovable
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/72ed5f1e-3f75-4018-aeb6-a4df244b64fd).
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/7358d229-85e1-47fa-91f8-40a49abce7e8).
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
 - **Stay in sync**: every change made in Lovable is committed straight to this repository.

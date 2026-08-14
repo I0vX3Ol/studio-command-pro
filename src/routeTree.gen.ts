@@ -11,14 +11,14 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
-import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as SignupRouteImport } from './routes/signup'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppAnalyticsRouteImport } from './routes/app.analytics'
 import { Route as AppCrmRouteImport } from './routes/app.crm'
 import { Route as AppEquipmentRouteImport } from './routes/app.equipment'
 import { Route as AppEstimatingRouteImport } from './routes/app.estimating'
+import { Route as AppFinancialsRouteImport } from './routes/app.financials'
 import { Route as AppProjectsRouteImport } from './routes/app.projects'
+import { Route as AppTeamRouteImport } from './routes/app.team'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -30,24 +30,14 @@ const AppRoute = AppRouteImport.update({
   path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
-  id: '/forgot-password',
-  path: '/forgot-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => AppRoute,
 } as any)
 const AppCrmRoute = AppCrmRouteImport.update({
@@ -65,46 +55,56 @@ const AppEstimatingRoute = AppEstimatingRouteImport.update({
   path: '/estimating',
   getParentRoute: () => AppRoute,
 } as any)
+const AppFinancialsRoute = AppFinancialsRouteImport.update({
+  id: '/financials',
+  path: '/financials',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppProjectsRoute = AppProjectsRouteImport.update({
   id: '/projects',
   path: '/projects',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTeamRoute = AppTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
   getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
-  '/forgot-password': typeof ForgotPasswordRoute
-  '/login': typeof LoginRoute
-  '/signup': typeof SignupRoute
+  '/app/analytics': typeof AppAnalyticsRoute
   '/app/crm': typeof AppCrmRoute
   '/app/equipment': typeof AppEquipmentRoute
   '/app/estimating': typeof AppEstimatingRoute
+  '/app/financials': typeof AppFinancialsRoute
   '/app/projects': typeof AppProjectsRoute
+  '/app/team': typeof AppTeamRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/forgot-password': typeof ForgotPasswordRoute
-  '/login': typeof LoginRoute
-  '/signup': typeof SignupRoute
+  '/app/analytics': typeof AppAnalyticsRoute
   '/app/crm': typeof AppCrmRoute
   '/app/equipment': typeof AppEquipmentRoute
   '/app/estimating': typeof AppEstimatingRoute
+  '/app/financials': typeof AppFinancialsRoute
   '/app/projects': typeof AppProjectsRoute
+  '/app/team': typeof AppTeamRoute
   '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
-  '/forgot-password': typeof ForgotPasswordRoute
-  '/login': typeof LoginRoute
-  '/signup': typeof SignupRoute
+  '/app/analytics': typeof AppAnalyticsRoute
   '/app/crm': typeof AppCrmRoute
   '/app/equipment': typeof AppEquipmentRoute
   '/app/estimating': typeof AppEstimatingRoute
+  '/app/financials': typeof AppFinancialsRoute
   '/app/projects': typeof AppProjectsRoute
+  '/app/team': typeof AppTeamRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
@@ -112,45 +112,42 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
-    | '/forgot-password'
-    | '/login'
-    | '/signup'
+    | '/app/analytics'
     | '/app/crm'
     | '/app/equipment'
     | '/app/estimating'
+    | '/app/financials'
     | '/app/projects'
+    | '/app/team'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/forgot-password'
-    | '/login'
-    | '/signup'
+    | '/app/analytics'
     | '/app/crm'
     | '/app/equipment'
     | '/app/estimating'
+    | '/app/financials'
     | '/app/projects'
+    | '/app/team'
     | '/app'
   id:
     | '__root__'
     | '/'
     | '/app'
-    | '/forgot-password'
-    | '/login'
-    | '/signup'
+    | '/app/analytics'
     | '/app/crm'
     | '/app/equipment'
     | '/app/estimating'
+    | '/app/financials'
     | '/app/projects'
+    | '/app/team'
     | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
-  ForgotPasswordRoute: typeof ForgotPasswordRoute
-  LoginRoute: typeof LoginRoute
-  SignupRoute: typeof SignupRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -169,32 +166,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/forgot-password': {
-      id: '/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof ForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/app/': {
       id: '/app/'
       path: '/'
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/analytics': {
+      id: '/app/analytics'
+      path: '/analytics'
+      fullPath: '/app/analytics'
+      preLoaderRoute: typeof AppAnalyticsRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/crm': {
@@ -218,6 +201,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEstimatingRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/financials': {
+      id: '/app/financials'
+      path: '/financials'
+      fullPath: '/app/financials'
+      preLoaderRoute: typeof AppFinancialsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/projects': {
       id: '/app/projects'
       path: '/projects'
@@ -225,22 +215,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProjectsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/team': {
+      id: '/app/team'
+      path: '/team'
+      fullPath: '/app/team'
+      preLoaderRoute: typeof AppTeamRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppAnalyticsRoute: typeof AppAnalyticsRoute
   AppCrmRoute: typeof AppCrmRoute
   AppEquipmentRoute: typeof AppEquipmentRoute
   AppEstimatingRoute: typeof AppEstimatingRoute
+  AppFinancialsRoute: typeof AppFinancialsRoute
   AppProjectsRoute: typeof AppProjectsRoute
+  AppTeamRoute: typeof AppTeamRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAnalyticsRoute: AppAnalyticsRoute,
   AppCrmRoute: AppCrmRoute,
   AppEquipmentRoute: AppEquipmentRoute,
   AppEstimatingRoute: AppEstimatingRoute,
+  AppFinancialsRoute: AppFinancialsRoute,
   AppProjectsRoute: AppProjectsRoute,
+  AppTeamRoute: AppTeamRoute,
   AppIndexRoute: AppIndexRoute,
 }
 
@@ -249,9 +252,6 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
-  ForgotPasswordRoute: ForgotPasswordRoute,
-  LoginRoute: LoginRoute,
-  SignupRoute: SignupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

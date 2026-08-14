@@ -1,12 +1,12 @@
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { useState } from "react";
-import { navGroups } from "@/lib/nav";
-import { currentUser, org } from "@/lib/mock-data";
-import { useTheme } from "@/lib/theme";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Link, Outlet, createFileRoute, useRouterState } from "@tanstack/react-router";
+import { Bell, Menu, Moon, Search, Sparkles, Sun, X } from "lucide-react";
+import { useEffect, useState } from "react";
+
+import { AiPanel } from "@/components/app/ai-panel";
+import { CommandPalette } from "@/components/app/command-palette";
+import { navGroups, navItems } from "@/components/app/nav";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,171 +15,262 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CommandPalette, useCommandPalette } from "@/components/shell/command-palette";
-import { AIPanel, useAIPanel } from "@/components/shell/ai-panel";
-import { Bell, Menu, Moon, Search, Sparkles, Sun } from "lucide-react";
+import { org, user } from "@/lib/mock-data";
+import { useTheme } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/app")({
+  head: () => ({
+    meta: [
+      { title: "Workspace — BuildFlow AI" },
+      {
+        name: "description",
+        content:
+          "The BuildFlow AI workspace: projects, estimating, financials and field operations in one console.",
+      },
+    ],
+  }),
   component: AppLayout,
 });
 
-function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
-  return (
-    <nav className="space-y-7 px-3 py-2" aria-label="Primary">
-      {navGroups.map((group) => (
-        <div key={group.group}>
-          <p className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            {group.group}
-          </p>
-          <ul className="space-y-0.5">
-            {group.items.map((item) => (
-              <li key={item.to}>
-                <Link
-                  to={item.to}
-                  activeOptions={{ exact: item.to === "/app" }}
-                  onClick={onNavigate}
-                  className="group flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                  activeProps={{
-                    className: "bg-sidebar-accent font-medium text-sidebar-accent-foreground",
-                  }}
-                >
-                  <item.icon className="size-4 shrink-0 opacity-70" aria-hidden />
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
-    </nav>
-  );
-}
-
 function AppLayout() {
-  const palette = useCommandPalette();
-  const ai = useAIPanel();
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
+  const [mobileNav, setMobileNav] = useState(false);
   const { theme, toggle } = useTheme();
-  const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  useEffect(() => {
+    setMobileNav(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const meta = e.metaKey || e.ctrlKey;
+      if (meta && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaletteOpen((v) => !v);
+      } else if (meta && e.key.toLowerCase() === "j") {
+        e.preventDefault();
+        setAiOpen((v) => !v);
+      } else if (meta && e.key === "\\") {
+        e.preventDefault();
+        toggle();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [toggle]);
 
   return (
     <div className="min-h-screen bg-background">
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:text-primary-foreground"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-60 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground"
       >
         Skip to content
       </a>
 
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-sidebar-border bg-sidebar lg:flex">
-        <div className="flex h-16 items-center gap-2.5 px-6">
-          <div className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Sparkles className="size-4" aria-hidden />
-          </div>
-          <span className="text-sm font-semibold tracking-tight">BuildFlow AI</span>
-        </div>
-        <div className="flex-1 overflow-y-auto pb-6">
-          <SidebarNav />
-        </div>
-        <div className="border-t border-sidebar-border p-4">
-          <div className="rounded-xl bg-sidebar-accent p-3">
-            <p className="text-xs font-medium">{org.name}</p>
-            <p className="mt-1 text-[11px] text-muted-foreground">
-              {org.plan} plan · {org.seatsUsed}/{org.seats} seats
-            </p>
-          </div>
-        </div>
-      </aside>
+      {mobileNav ? (
+        <div
+          className="fixed inset-0 z-40 bg-foreground/30 lg:hidden"
+          onClick={() => setMobileNav(false)}
+          aria-hidden
+        />
+      ) : null}
 
-      <div className="lg:pl-64">
-        <header className="glass sticky top-0 z-20 flex h-16 items-center gap-3 border-b px-4 sm:px-6">
-          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open navigation">
-                <Menu className="size-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-72 p-0">
-              <SheetTitle className="px-6 py-5 text-sm">BuildFlow AI</SheetTitle>
-              <SidebarNav onNavigate={() => setMobileOpen(false)} />
-            </SheetContent>
-          </Sheet>
+      <Sidebar open={mobileNav} onClose={() => setMobileNav(false)} pathname={pathname} />
 
-          <button
-            onClick={() => palette.setOpen(true)}
-            className="flex h-9 flex-1 items-center gap-2 rounded-xl border border-border bg-surface px-3 text-sm text-muted-foreground transition-colors hover:bg-accent sm:max-w-sm"
-          >
-            <Search className="size-4" aria-hidden />
-            <span className="truncate">Search or jump to…</span>
-            <kbd className="ml-auto hidden rounded border border-border px-1.5 py-0.5 text-[10px] sm:inline">
-              ⌘K
-            </kbd>
-          </button>
-
-          <div className="ml-auto flex items-center gap-1.5">
+      <div className="lg:pl-[16.5rem]">
+        <header className="glass sticky top-0 z-30 border-b border-border">
+          <div className="flex h-16 items-center gap-3 px-4 sm:px-6">
             <Button
-              variant="outline"
-              className="hidden rounded-xl sm:inline-flex"
-              onClick={() => ai.setOpen(true)}
+              variant="ghost"
+              size="icon"
+              className="lg:hidden"
+              onClick={() => setMobileNav(true)}
+              aria-label="Open navigation"
             >
-              <Sparkles className="size-4" aria-hidden />
-              Ask AI
-              <kbd className="ml-1 rounded border border-border px-1.5 py-0.5 text-[10px]">⌘J</kbd>
+              <Menu className="size-4" aria-hidden />
             </Button>
-            <Button variant="ghost" size="icon" onClick={toggle} aria-label="Toggle theme">
-              {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
-            </Button>
-            <Button variant="ghost" size="icon" aria-label="Notifications" className="relative">
-              <Bell className="size-4" />
-              <span className="absolute right-2 top-2 size-1.5 rounded-full bg-signal" />
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button aria-label="Account menu" className="ml-1 rounded-full">
-                  <Avatar className="size-8">
-                    <AvatarFallback className="text-xs">{currentUser.initials}</AvatarFallback>
-                  </Avatar>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>
-                  <p className="text-sm font-medium">{currentUser.name}</p>
-                  <p className="text-xs font-normal text-muted-foreground">{currentUser.email}</p>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/app/settings">Profile settings</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/app/settings">Billing</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/login">Sign out</Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+
+            <button
+              onClick={() => setPaletteOpen(true)}
+              className="group flex h-9 flex-1 items-center gap-2 rounded-lg border border-border bg-card px-3 text-sm text-muted-foreground transition-colors hover:bg-secondary sm:max-w-md"
+            >
+              <Search className="size-4" aria-hidden />
+              <span className="truncate">Search projects, invoices, people…</span>
+              <kbd className="num ml-auto hidden rounded border border-border px-1.5 py-0.5 text-[0.65rem] sm:inline">
+                ⌘K
+              </kbd>
+            </button>
+
+            <div className="ml-auto flex items-center gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                className="hidden sm:inline-flex"
+                onClick={() => setAiOpen(true)}
+              >
+                <Sparkles className="size-4" aria-hidden />
+                Ask AI
+                <kbd className="num ml-1 text-[0.65rem] text-muted-foreground">⌘J</kbd>
+              </Button>
+              <Button variant="ghost" size="icon" onClick={toggle} aria-label="Toggle color theme">
+                {theme === "dark" ? (
+                  <Sun className="size-4" aria-hidden />
+                ) : (
+                  <Moon className="size-4" aria-hidden />
+                )}
+              </Button>
+              <Button variant="ghost" size="icon" aria-label="Notifications" className="relative">
+                <Bell className="size-4" aria-hidden />
+                <span className="absolute top-2 right-2 size-1.5 rounded-full bg-destructive" />
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="ml-1 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                    <Avatar className="size-8">
+                      <AvatarFallback className="bg-secondary text-xs font-semibold">
+                        {user.initials}
+                      </AvatarFallback>
+                    </Avatar>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>
+                    <p className="text-sm font-medium">{user.name}</p>
+                    <p className="text-xs font-normal text-muted-foreground">{user.email}</p>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/app/settings">Profile settings</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/app/settings">Organization</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/app/settings">Billing</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/login">Sign out</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </header>
 
-        <main id="main" className="mx-auto w-full max-w-[1400px] px-4 py-8 sm:px-8 sm:py-10">
-          <div key={pathname} className="animate-rise space-y-8">
+        <main id="main" key={pathname} className="animate-rise px-4 py-8 sm:px-6 lg:px-10">
+          <div className="mx-auto max-w-[80rem] space-y-8">
             <Outlet />
           </div>
         </main>
       </div>
 
-      <CommandPalette open={palette.open} setOpen={palette.setOpen} onAskAI={() => ai.setOpen(true)} />
-      <AIPanel open={ai.open} setOpen={ai.setOpen} />
-
       <Button
-        onClick={() => ai.setOpen(true)}
+        onClick={() => setAiOpen(true)}
         size="icon"
-        className={cn("fixed bottom-6 right-6 z-20 size-12 rounded-full shadow-float sm:hidden")}
-        aria-label="Ask BuildFlow AI"
+        className="fixed right-5 bottom-5 z-40 size-12 rounded-full shadow-lift sm:hidden"
+        aria-label="Open BuildFlow AI"
       >
-        <Sparkles className="size-5" />
+        <Sparkles className="size-5" aria-hidden />
       </Button>
+
+      <AiPanel open={aiOpen} onClose={() => setAiOpen(false)} />
+      <CommandPalette
+        open={paletteOpen}
+        onOpenChange={setPaletteOpen}
+        onAskAi={() => setAiOpen(true)}
+      />
     </div>
+  );
+}
+
+function Sidebar({
+  open,
+  onClose,
+  pathname,
+}: {
+  open: boolean;
+  onClose: () => void;
+  pathname: string;
+}) {
+  return (
+    <nav
+      aria-label="Primary"
+      className={cn(
+        "fixed inset-y-0 left-0 z-50 flex w-[16.5rem] flex-col border-r border-sidebar-border bg-sidebar transition-transform duration-300 lg:translate-x-0",
+        open ? "translate-x-0" : "-translate-x-full",
+      )}
+    >
+      <div className="flex h-16 items-center gap-2.5 px-5">
+        <Link to="/" className="flex items-center gap-2.5">
+          <span className="grid size-8 place-items-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
+            B
+          </span>
+          <span className="text-sm font-semibold tracking-tight">BuildFlow AI</span>
+        </Link>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="ml-auto lg:hidden"
+          onClick={onClose}
+          aria-label="Close navigation"
+        >
+          <X className="size-4" aria-hidden />
+        </Button>
+      </div>
+
+      <div className="flex-1 space-y-6 overflow-y-auto px-3 py-4">
+        {navGroups.map((group) => (
+          <div key={group}>
+            <p className="px-3 pb-2 text-[0.68rem] font-semibold tracking-wider text-muted-foreground uppercase">
+              {group}
+            </p>
+            <ul className="space-y-0.5">
+              {navItems
+                .filter((i) => i.group === group)
+                .map((item) => {
+                  const active = item.to === "/app" ? pathname === "/app" : pathname.startsWith(item.to);
+                  return (
+                    <li key={item.to}>
+                      <Link
+                        to={item.to}
+                        aria-current={active ? "page" : undefined}
+                        className={cn(
+                          "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                          active
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                            : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
+                        )}
+                      >
+                        <item.icon className="size-4" aria-hidden />
+                        {item.label}
+                      </Link>
+                    </li>
+                  );
+                })}
+            </ul>
+          </div>
+        ))}
+      </div>
+
+      <div className="border-t border-sidebar-border p-3">
+        <div className="rounded-xl bg-card p-4">
+          <p className="text-xs font-medium">{org.name}</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {org.plan} plan · {org.seats} seats
+          </p>
+          <Link
+            to="/app/settings"
+            className="mt-3 inline-flex text-xs font-medium text-primary hover:underline"
+          >
+            Manage subscription
+          </Link>
+        </div>
+      </div>
+    </nav>
   );
 }
