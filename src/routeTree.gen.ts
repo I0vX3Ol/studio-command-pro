@@ -12,9 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppAnalyticsRouteImport } from './routes/app.analytics'
 import { Route as AppCrmRouteImport } from './routes/app.crm'
 import { Route as AppEquipmentRouteImport } from './routes/app.equipment'
 import { Route as AppEstimatingRouteImport } from './routes/app.estimating'
+import { Route as AppFinancialsRouteImport } from './routes/app.financials'
 import { Route as AppProjectsRouteImport } from './routes/app.projects'
 import { Route as AppTeamRouteImport } from './routes/app.team'
 
@@ -33,6 +35,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppCrmRoute = AppCrmRouteImport.update({
   id: '/crm',
   path: '/crm',
@@ -46,6 +53,11 @@ const AppEquipmentRoute = AppEquipmentRouteImport.update({
 const AppEstimatingRoute = AppEstimatingRouteImport.update({
   id: '/estimating',
   path: '/estimating',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFinancialsRoute = AppFinancialsRouteImport.update({
+  id: '/financials',
+  path: '/financials',
   getParentRoute: () => AppRoute,
 } as any)
 const AppProjectsRoute = AppProjectsRouteImport.update({
@@ -62,18 +74,22 @@ const AppTeamRoute = AppTeamRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/app/analytics': typeof AppAnalyticsRoute
   '/app/crm': typeof AppCrmRoute
   '/app/equipment': typeof AppEquipmentRoute
   '/app/estimating': typeof AppEstimatingRoute
+  '/app/financials': typeof AppFinancialsRoute
   '/app/projects': typeof AppProjectsRoute
   '/app/team': typeof AppTeamRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/app/analytics': typeof AppAnalyticsRoute
   '/app/crm': typeof AppCrmRoute
   '/app/equipment': typeof AppEquipmentRoute
   '/app/estimating': typeof AppEstimatingRoute
+  '/app/financials': typeof AppFinancialsRoute
   '/app/projects': typeof AppProjectsRoute
   '/app/team': typeof AppTeamRoute
   '/app': typeof AppIndexRoute
@@ -82,9 +98,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/app/analytics': typeof AppAnalyticsRoute
   '/app/crm': typeof AppCrmRoute
   '/app/equipment': typeof AppEquipmentRoute
   '/app/estimating': typeof AppEstimatingRoute
+  '/app/financials': typeof AppFinancialsRoute
   '/app/projects': typeof AppProjectsRoute
   '/app/team': typeof AppTeamRoute
   '/app/': typeof AppIndexRoute
@@ -94,18 +112,22 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
+    | '/app/analytics'
     | '/app/crm'
     | '/app/equipment'
     | '/app/estimating'
+    | '/app/financials'
     | '/app/projects'
     | '/app/team'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/app/analytics'
     | '/app/crm'
     | '/app/equipment'
     | '/app/estimating'
+    | '/app/financials'
     | '/app/projects'
     | '/app/team'
     | '/app'
@@ -113,9 +135,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/app'
+    | '/app/analytics'
     | '/app/crm'
     | '/app/equipment'
     | '/app/estimating'
+    | '/app/financials'
     | '/app/projects'
     | '/app/team'
     | '/app/'
@@ -149,6 +173,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/analytics': {
+      id: '/app/analytics'
+      path: '/analytics'
+      fullPath: '/app/analytics'
+      preLoaderRoute: typeof AppAnalyticsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/crm': {
       id: '/app/crm'
       path: '/crm'
@@ -170,6 +201,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEstimatingRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/financials': {
+      id: '/app/financials'
+      path: '/financials'
+      fullPath: '/app/financials'
+      preLoaderRoute: typeof AppFinancialsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/projects': {
       id: '/app/projects'
       path: '/projects'
@@ -188,18 +226,22 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppAnalyticsRoute: typeof AppAnalyticsRoute
   AppCrmRoute: typeof AppCrmRoute
   AppEquipmentRoute: typeof AppEquipmentRoute
   AppEstimatingRoute: typeof AppEstimatingRoute
+  AppFinancialsRoute: typeof AppFinancialsRoute
   AppProjectsRoute: typeof AppProjectsRoute
   AppTeamRoute: typeof AppTeamRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAnalyticsRoute: AppAnalyticsRoute,
   AppCrmRoute: AppCrmRoute,
   AppEquipmentRoute: AppEquipmentRoute,
   AppEstimatingRoute: AppEstimatingRoute,
+  AppFinancialsRoute: AppFinancialsRoute,
   AppProjectsRoute: AppProjectsRoute,
   AppTeamRoute: AppTeamRoute,
   AppIndexRoute: AppIndexRoute,
