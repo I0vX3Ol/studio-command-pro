@@ -1,18 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { FileUp, Loader2, Sparkles, Wand2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from "recharts";
-import { PageHeader, Section, StatCard, StatusPill } from "@/components/shell/primitives";
-import { axisProps, ChartTooltip } from "@/components/shell/chart-bits";
+
+import { PageHeader } from "@/components/app/page-header";
+import { Section } from "@/components/app/section";
+import { StatCard } from "@/components/app/stat-card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { currency, estimateBreakdown, estimateRevisions, estimates } from "@/lib/mock-data";
-import { FileUp, Mail, Send, Sparkles, UploadCloud } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { currency, estimates } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/app/estimating")({
   head: () => ({
@@ -20,233 +18,169 @@ export const Route = createFileRoute("/app/estimating")({
       { title: "AI Estimating — BuildFlow AI" },
       {
         name: "description",
-        content: "Upload blueprints and generate labor, material, and risk-scored estimates with branded proposals.",
+        content:
+          "Generate construction estimates from blueprints and scope notes with AI takeoffs and risk scoring.",
       },
       { property: "og:title", content: "AI Estimating — BuildFlow AI" },
-      { property: "og:description", content: "Blueprint-native takeoffs, risk scoring, and branded proposals." },
+      {
+        property: "og:description",
+        content: "Blueprint takeoffs, line-item pricing and risk scoring in minutes.",
+      },
     ],
   }),
   component: EstimatingPage,
 });
 
-function EstimatingPage() {
-  const [analyzing, setAnalyzing] = useState(false);
-  const [markup, setMarkup] = useState([18]);
-  const cost = estimateBreakdown.reduce((s, b) => s + b.amount, 0);
-  const pct = markup[0] ?? 18;
-  const price = Math.round(cost * (1 + pct / 100));
+const lineItems = [
+  { div: "03", name: "Concrete — slab on grade", qty: "4,200 sf", unit: 11.4, total: 47_880 },
+  { div: "05", name: "Structural steel erection", qty: "62 tons", unit: 3_180, total: 197_160 },
+  { div: "06", name: "Rough carpentry", qty: "1 ls", unit: 62_400, total: 62_400 },
+  { div: "23", name: "HVAC rough-in", qty: "1 ls", unit: 148_500, total: 148_500 },
+  { div: "26", name: "Electrical distribution", qty: "1 ls", unit: 121_900, total: 121_900 },
+];
 
-  const analyze = () => {
-    setAnalyzing(true);
+function EstimatingPage() {
+  const [scope, setScope] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(false);
+
+  const subtotal = lineItems.reduce((s, l) => s + l.total, 0);
+  const overhead = Math.round(subtotal * 0.09);
+  const profit = Math.round(subtotal * 0.12);
+
+  const generate = () => {
+    setBusy(true);
+    setDone(false);
     window.setTimeout(() => {
-      setAnalyzing(false);
-      toast.success("Blueprint parsed — 214 quantities extracted");
+      setBusy(false);
+      setDone(true);
+      toast.success("Estimate generated", { description: "42 pages analyzed · 5 divisions priced" });
     }, 1400);
   };
 
   return (
     <>
       <PageHeader
-        eyebrow="Revenue"
-        title="AI Estimating"
-        description="Turn a blueprint set into a defensible, risk-scored estimate and a branded proposal."
+        title="AI estimating"
+        description="Upload drawings or describe the scope — BuildFlow produces a priced takeoff with risk scoring."
         actions={
-          <>
-            <Button variant="outline" className="rounded-xl" onClick={() => toast.success("PDF exported")}>
-              <FileUp className="size-4" />
-              Export PDF
-            </Button>
-            <Button className="rounded-xl" onClick={() => toast.success("Proposal sent to customer")}>
-              <Send className="size-4" />
-              Send proposal
-            </Button>
-          </>
+          <Button variant="outline">
+            <FileUp className="size-4" aria-hidden /> Upload blueprints
+          </Button>
         }
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Estimated cost" value={currency(cost)} hint="All categories" />
-        <StatCard label="Sell price" value={currency(price)} hint={`${pct}% markup`} />
-        <StatCard label="Gross profit" value={currency(price - cost)} delta={pct / 2} />
-        <StatCard label="Risk score" value="Medium" hint="Steel escalation exposure" />
+        <StatCard label="Estimates this month" value="14" delta={22.4} icon={Sparkles} />
+        <StatCard label="Avg. turnaround" value="18 min" delta={-41.2} hint="was 9 hours" />
+        <StatCard label="Bid win rate" value="46%" delta={5.1} />
+        <StatCard label="Pipeline priced" value={currency(2_160_500)} delta={8.8} />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <Section title="Documents" description="Blueprints, PDFs, and site photos" className="lg:col-span-1">
-          <button
-            onClick={analyze}
-            className="flex w-full flex-col items-center justify-center rounded-xl border border-dashed border-border py-12 transition-colors hover:bg-accent"
-          >
-            <UploadCloud className="size-6 text-muted-foreground" aria-hidden />
-            <p className="mt-3 text-sm font-medium">Upload blueprint set</p>
-            <p className="mt-1 text-xs text-muted-foreground">PDF, DWG, JPG · up to 250 MB</p>
-          </button>
-
-          {analyzing ? (
-            <div className="mt-5 space-y-3">
-              <p className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Sparkles className="size-3.5 text-signal" aria-hidden />
-                Reading sheets and extracting quantities…
-              </p>
-              <Skeleton className="h-3 w-full" />
-              <Skeleton className="h-3 w-4/5" />
-              <Skeleton className="h-3 w-2/3" />
-            </div>
-          ) : (
-            <ul className="mt-5 space-y-2 text-sm">
-              {["A-101 → A-118 architectural.pdf", "S-201 structural.pdf", "Site photos (18)"].map((f) => (
-                <li key={f} className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
-                  <span className="truncate pr-3 text-muted-foreground">{f}</span>
-                  <StatusPill status="Complete" />
-                </li>
-              ))}
-            </ul>
-          )}
-        </Section>
-
-        <Section title="Cost breakdown" description="AI-generated labor and material takeoff" className="lg:col-span-2">
-          <div className="h-56 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={estimateBreakdown} margin={{ left: -8, right: 8, top: 8 }}>
-                <CartesianGrid stroke="var(--color-border)" vertical={false} />
-                <XAxis dataKey="category" {...axisProps} />
-                <YAxis {...axisProps} tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
-                <ChartTooltip />
-                <Bar dataKey="amount" fill="var(--color-chart-1)" radius={[8, 8, 0, 0]} maxBarSize={56} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          <Table className="mt-4">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Category</TableHead>
-                <TableHead className="text-right">Hours</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {estimateBreakdown.map((b) => (
-                <TableRow key={b.category}>
-                  <TableCell className="font-medium">{b.category}</TableCell>
-                  <TableCell className="num text-right text-muted-foreground">
-                    {b.hours ? b.hours.toLocaleString() : "—"}
-                  </TableCell>
-                  <TableCell className="num text-right">{currency(b.amount)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Section>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-3">
-        <Section title="Profit & markup calculator">
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="cost">Total cost</Label>
-              <Input id="cost" readOnly value={currency(cost)} className="num h-11 rounded-xl" />
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="markup">Markup</Label>
-                <span className="num text-sm">{pct}%</span>
-              </div>
-              <Slider id="markup" value={markup} onValueChange={setMarkup} min={5} max={40} step={1} />
-            </div>
-            <div className="rounded-xl border border-border bg-muted/40 p-4">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Sell price</span>
-                <span className="num font-semibold">{currency(price)}</span>
-              </div>
-              <div className="mt-2 flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Gross profit</span>
-                <span className="num font-semibold">{currency(price - cost)}</span>
-              </div>
-            </div>
-          </div>
-        </Section>
-
-        <Section title="Risk assessment" description="Weighted by scope, schedule, and market">
-          <div className="space-y-5">
-            {[
-              ["Material escalation", 68],
-              ["Schedule compression", 42],
-              ["Scope ambiguity", 55],
-              ["Subcontractor coverage", 24],
-            ].map(([label, v]) => (
-              <div key={label as string}>
-                <div className="flex items-center justify-between text-sm">
-                  <span>{label}</span>
-                  <span className="num text-muted-foreground">{v}</span>
-                </div>
-                <Progress value={v as number} className="mt-2 h-1.5" />
-              </div>
-            ))}
-          </div>
-          <div className="mt-6 rounded-xl border border-border bg-muted/40 p-4">
-            <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-              <Sparkles className="size-3.5 text-signal" aria-hidden />
-              AI recommendation
-            </p>
-            <p className="mt-2 text-sm leading-relaxed">
-              Add a 4% steel escalation allowance and clarify site access on sheet A-104 before issuing. That
-              moves the risk score from Medium to Low and protects roughly $34,000 of margin.
-            </p>
-          </div>
-        </Section>
-
-        <Section title="Revision history" padded={false}>
-          <ul className="divide-y divide-border">
-            {estimateRevisions.map((r) => (
-              <li key={r.rev} className="px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <p className="num text-sm font-semibold">{r.rev}</p>
-                  <span className="text-xs text-muted-foreground">{r.date}</span>
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">{r.author}</p>
-                <p className="mt-2 text-sm leading-relaxed">{r.note}</p>
-              </li>
-            ))}
-          </ul>
-        </Section>
-      </div>
-
-      <Section
-        title="All estimates"
-        actions={
-          <Button variant="outline" size="sm" className="rounded-lg" onClick={() => toast.success("Emailed to customer")}>
-            <Mail className="size-4" />
-            Email customer
+        <Section title="Scope input" description="Describe the job or paste a spec section">
+          <Textarea
+            value={scope}
+            onChange={(e) => setScope(e.target.value)}
+            rows={8}
+            placeholder="e.g. 4,200 sf warehouse dock retrofit, two new overhead doors, structural steel headers, new panel and lighting…"
+          />
+          <Button className="mt-4 w-full" onClick={generate} disabled={busy}>
+            {busy ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+            ) : (
+              <Wand2 className="size-4" aria-hidden />
+            )}
+            {busy ? "Analyzing…" : "Generate estimate"}
           </Button>
-        }
-        padded={false}
-      >
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Estimate</TableHead>
-              <TableHead>Project</TableHead>
-              <TableHead>Customer</TableHead>
-              <TableHead className="text-right">Total</TableHead>
-              <TableHead className="text-right">Margin</TableHead>
-              <TableHead>Risk</TableHead>
-              <TableHead>Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {estimates.map((e) => (
-              <TableRow key={e.id}>
-                <TableCell className="num font-medium">{e.id}</TableCell>
-                <TableCell>{e.project}</TableCell>
-                <TableCell className="text-muted-foreground">{e.customer}</TableCell>
-                <TableCell className="num text-right">{currency(e.total)}</TableCell>
-                <TableCell className="num text-right">{e.margin}%</TableCell>
-                <TableCell><StatusPill status={e.risk} /></TableCell>
-                <TableCell><StatusPill status={e.status} /></TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+          <div className="mt-5 rounded-xl bg-secondary p-4 text-xs text-muted-foreground">
+            Historical cost data from 128 completed Northbeam projects is used to price each line
+            item, then adjusted for region, season and crew productivity.
+          </div>
+        </Section>
+
+        <Section
+          title="Generated takeoff"
+          description="CSI divisions with unit pricing"
+          className="lg:col-span-2"
+          bodyClassName="p-0"
+          action={done ? <Badge variant="secondary">Draft ready</Badge> : null}
+        >
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="border-b border-border text-left text-xs text-muted-foreground">
+                <tr>
+                  <th className="px-6 py-3 font-medium">Div</th>
+                  <th className="px-6 py-3 font-medium">Line item</th>
+                  <th className="px-6 py-3 font-medium">Qty</th>
+                  <th className="px-6 py-3 text-right font-medium">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {lineItems.map((l) => (
+                  <tr key={l.div} className="border-b border-border/60">
+                    <td className="num px-6 py-3 text-muted-foreground">{l.div}</td>
+                    <td className="px-6 py-3 font-medium">{l.name}</td>
+                    <td className="num px-6 py-3 text-muted-foreground">{l.qty}</td>
+                    <td className="num px-6 py-3 text-right">{currency(l.total)}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot className="text-sm">
+                <tr>
+                  <td colSpan={3} className="px-6 py-2 text-muted-foreground">
+                    Subtotal
+                  </td>
+                  <td className="num px-6 py-2 text-right">{currency(subtotal)}</td>
+                </tr>
+                <tr>
+                  <td colSpan={3} className="px-6 py-2 text-muted-foreground">
+                    Overhead (9%)
+                  </td>
+                  <td className="num px-6 py-2 text-right">{currency(overhead)}</td>
+                </tr>
+                <tr>
+                  <td colSpan={3} className="px-6 py-2 text-muted-foreground">
+                    Profit (12%)
+                  </td>
+                  <td className="num px-6 py-2 text-right">{currency(profit)}</td>
+                </tr>
+                <tr className="border-t border-border">
+                  <td colSpan={3} className="px-6 py-3 font-semibold">
+                    Bid total
+                  </td>
+                  <td className="num px-6 py-3 text-right font-semibold">
+                    {currency(subtotal + overhead + profit)}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </Section>
+      </div>
+
+      <Section title="Recent estimates" description="Risk score reflects scope volatility and margin exposure">
+        <ul className="space-y-5">
+          {estimates.map((e) => (
+            <li key={e.id} className="flex flex-wrap items-center gap-4">
+              <div className="min-w-48 flex-1">
+                <p className="text-sm font-medium">{e.project}</p>
+                <p className="num text-xs text-muted-foreground">
+                  {e.id} · {e.client}
+                </p>
+              </div>
+              <div className="w-40">
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>Risk</span>
+                  <span className="num">{e.risk}%</span>
+                </div>
+                <Progress value={e.risk} className="mt-1.5 h-1.5" />
+              </div>
+              <span className="num w-28 text-right text-sm font-medium">{currency(e.total)}</span>
+              <Badge variant="outline">{e.status}</Badge>
+            </li>
+          ))}
+        </ul>
       </Section>
     </>
   );
