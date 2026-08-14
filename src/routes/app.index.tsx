@@ -1,17 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  Activity,
-  CalendarClock,
-  CheckCircle2,
-  CloudSun,
-  FileText,
-  HardHat,
-  Receipt,
-  Sparkles,
-  TrendingUp,
-  Truck,
-} from "lucide-react";
-import {
   Area,
   AreaChart,
   CartesianGrid,
@@ -22,13 +10,10 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-
-import { PageHeader } from "@/components/app/page-header";
-import { Section } from "@/components/app/section";
-import { StatCard } from "@/components/app/stat-card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { PageHeader, Section, StatCard, StatusPill } from "@/components/shell/primitives";
 import {
   activity,
   completionSeries,
@@ -36,46 +21,44 @@ import {
   deadlines,
   employees,
   equipment,
+  kpis,
   revenueSeries,
+  weather,
 } from "@/lib/mock-data";
+import { CloudSun, Download, Plus, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/app/")({
   head: () => ({
     meta: [
       { title: "Dashboard — BuildFlow AI" },
-      {
-        name: "description",
-        content:
-          "Revenue, estimates, active projects, field crews and AI activity for your construction business at a glance.",
-      },
+      { name: "description", content: "Revenue, projects, crews, equipment, and AI activity at a glance." },
       { property: "og:title", content: "Dashboard — BuildFlow AI" },
-      {
-        property: "og:description",
-        content: "Live operating picture for revenue, projects, crews and equipment.",
-      },
+      { property: "og:description", content: "Revenue, projects, crews, equipment, and AI activity at a glance." },
     ],
   }),
   component: Dashboard,
 });
 
 const axis = {
-  stroke: "var(--muted-foreground)",
+  stroke: "var(--color-muted-foreground)",
   fontSize: 11,
   tickLine: false,
   axisLine: false,
 };
 
-function ChartTooltip({ active, payload, label }: any) {
-  if (!active || !payload?.length) return null;
+function ChartTooltip() {
   return (
-    <div className="surface px-3 py-2 text-xs">
-      <p className="font-medium">{label}</p>
-      {payload.map((p: any) => (
-        <p key={p.dataKey} className="num mt-1 text-muted-foreground">
-          {p.name}: {typeof p.value === "number" && p.value > 1000 ? currency(p.value) : p.value}
-        </p>
-      ))}
-    </div>
+    <Tooltip
+      cursor={{ stroke: "var(--color-border)" }}
+      contentStyle={{
+        background: "var(--color-popover)",
+        border: "1px solid var(--color-border)",
+        borderRadius: 12,
+        fontSize: 12,
+        boxShadow: "var(--elevation-lift)",
+        color: "var(--color-popover-foreground)",
+      }}
+    />
   );
 }
 
@@ -83,134 +66,122 @@ function Dashboard() {
   return (
     <>
       <PageHeader
-        title="Good morning, Dana"
-        description="Thursday, August 13 · Northbeam Construction is pacing 13% ahead of forecast this month."
+        eyebrow="Thursday, August 13"
+        title="Good afternoon, Avery"
+        description="Northline is tracking 4.2% ahead of forecast this month. Two invoices need escalation today."
         actions={
           <>
-            <Button variant="outline">
-              <FileText className="size-4" aria-hidden /> Export report
+            <Button variant="outline" className="rounded-xl">
+              <Download className="size-4" />
+              Export
             </Button>
-            <Button>
-              <Sparkles className="size-4" aria-hidden /> New AI estimate
+            <Button className="rounded-xl">
+              <Plus className="size-4" />
+              New project
             </Button>
           </>
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Revenue this month" value={currency(784000)} delta={13.4} hint="vs. forecast" icon={TrendingUp} />
-        <StatCard label="Open estimates" value="14" delta={4.2} hint="$3.1M pipeline" icon={FileText} />
-        <StatCard label="Projects in progress" value="9" hint="2 in punch list" icon={HardHat} />
-        <StatCard label="Invoices overdue" value={currency(280500)} delta={-8.1} hint="2 invoices" icon={Receipt} />
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {kpis.map((k) => (
+          <StatCard
+            key={k.label}
+            label={k.label}
+            value={k.format === "currency" ? currency(k.value) : String(k.value)}
+            delta={k.delta}
+            hint="vs. last month"
+          />
+        ))}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Section
-          title="Revenue"
-          description="Actual vs. forecast, last 8 months"
           className="lg:col-span-2"
-          action={<Badge variant="secondary">+13.4% MoM</Badge>}
+          title="Revenue vs. forecast"
+          description="Trailing eight months, recognized revenue"
         >
-          <div className="h-72">
+          <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={revenueSeries} margin={{ left: -12, right: 8, top: 8 }}>
                 <defs>
                   <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.28} />
-                    <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0} />
+                    <stop offset="0%" stopColor="var(--color-chart-1)" stopOpacity={0.18} />
+                    <stop offset="100%" stopColor="var(--color-chart-1)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke="var(--border)" vertical={false} />
+                <CartesianGrid stroke="var(--color-border)" vertical={false} />
                 <XAxis dataKey="month" {...axis} />
-                <YAxis {...axis} tickFormatter={(v) => `$${Math.round(v / 1000)}k`} width={54} />
-                <Tooltip content={<ChartTooltip />} />
+                <YAxis {...axis} tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
+                <ChartTooltip />
                 <Area
                   type="monotone"
                   dataKey="revenue"
-                  name="Revenue"
-                  stroke="var(--chart-1)"
+                  stroke="var(--color-chart-1)"
                   strokeWidth={2}
                   fill="url(#rev)"
                 />
-                <Line
+                <Area
                   type="monotone"
                   dataKey="forecast"
-                  name="Forecast"
-                  stroke="var(--muted-foreground)"
+                  stroke="var(--color-chart-2)"
+                  strokeWidth={2}
                   strokeDasharray="4 4"
-                  strokeWidth={1.5}
-                  dot={false}
+                  fill="none"
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </Section>
 
-        <div className="space-y-6">
-          <Section title="Today on site" description="Ballard, WA · 8:00 AM">
-            <div className="flex items-center gap-4">
-              <CloudSun className="size-10 text-warning" aria-hidden />
-              <div>
-                <p className="num text-3xl font-semibold">72°</p>
-                <p className="text-xs text-muted-foreground">Partly cloudy · 8% precipitation</p>
-              </div>
+        <Section title="Jobsite conditions" description={weather.location}>
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="num text-4xl font-semibold">{weather.temp}°</p>
+              <p className="mt-1 text-sm text-muted-foreground">{weather.condition}</p>
+              <p className="mt-3 text-xs text-muted-foreground">
+                Wind {weather.wind} mph · {weather.precip}% precip
+              </p>
             </div>
-            <div className="mt-5 grid grid-cols-3 gap-2 text-center text-xs">
-              {["Fri 74°", "Sat 69°", "Sun 66°"].map((d) => (
-                <div key={d} className="rounded-lg bg-secondary py-2 font-medium">
-                  {d}
-                </div>
-              ))}
-            </div>
-            <p className="mt-4 text-xs text-muted-foreground">
-              No weather holds expected. Concrete pour window is clear through Saturday.
-            </p>
-          </Section>
-
-          <Section title="Crew status" description="Live clock-in data">
-            <ul className="space-y-3">
-              {employees.slice(0, 4).map((e) => (
-                <li key={e.id} className="flex items-center justify-between text-sm">
-                  <span className="font-medium">{e.name}</span>
-                  <Badge
-                    variant={e.status === "PTO" ? "outline" : "secondary"}
-                    className={e.status === "On site" ? "text-success" : undefined}
-                  >
-                    {e.status}
-                  </Badge>
-                </li>
-              ))}
-            </ul>
-          </Section>
-        </div>
+            <CloudSun className="size-9 text-signal" aria-hidden />
+          </div>
+          <ul className="mt-6 space-y-3 border-t border-border pt-5">
+            {weather.forecast.map((d) => (
+              <li key={d.day} className="flex items-center justify-between text-sm">
+                <span className="w-10 text-muted-foreground">{d.day}</span>
+                <span className="text-muted-foreground">{d.condition}</span>
+                <span className="num">
+                  {d.hi}° / {d.lo}°
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Section>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <Section title="Project completion" description="Planned vs. actual milestones" className="lg:col-span-2">
-          <div className="h-60">
+        <Section title="Project completion" description="Planned vs. actual, current quarter" className="lg:col-span-2">
+          <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={completionSeries} margin={{ left: -18, right: 8, top: 8 }}>
-                <CartesianGrid stroke="var(--border)" vertical={false} />
+              <LineChart data={completionSeries} margin={{ left: -20, right: 8, top: 8 }}>
+                <CartesianGrid stroke="var(--color-border)" vertical={false} />
                 <XAxis dataKey="week" {...axis} />
-                <YAxis {...axis} width={40} />
-                <Tooltip content={<ChartTooltip />} />
-                <Line type="monotone" dataKey="planned" name="Planned" stroke="var(--muted-foreground)" strokeWidth={1.5} dot={false} />
-                <Line type="monotone" dataKey="actual" name="Actual" stroke="var(--chart-3)" strokeWidth={2.5} dot={false} />
+                <YAxis {...axis} unit="%" />
+                <ChartTooltip />
+                <Line type="monotone" dataKey="planned" stroke="var(--color-chart-5)" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="actual" stroke="var(--color-chart-3)" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </Section>
 
-        <Section title="Equipment utilization" description="Fleet of 24 assets">
-          <ul className="space-y-4">
-            {equipment.map((e) => (
+        <Section title="Equipment utilization" description="Top assets this week">
+          <ul className="space-y-5">
+            {equipment.slice(0, 4).map((e) => (
               <li key={e.id}>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="flex items-center gap-2 font-medium">
-                    <Truck className="size-4 text-muted-foreground" aria-hidden />
-                    {e.tag}
-                  </span>
-                  <span className="num text-xs text-muted-foreground">{e.util}%</span>
+                  <span className="truncate pr-3 font-medium">{e.name}</span>
+                  <span className="num text-muted-foreground">{e.util}%</span>
                 </div>
                 <Progress value={e.util} className="mt-2 h-1.5" />
               </li>
@@ -220,55 +191,69 @@ function Dashboard() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <Section title="Recent activity" description="Customers, crews and AI" className="lg:col-span-2">
-          <ul className="space-y-5">
-            {activity.map((a) => (
-              <li key={a.id} className="flex gap-3">
-                <span className="mt-0.5 rounded-lg bg-secondary p-1.5 text-muted-foreground">
-                  {a.kind === "ai" ? (
-                    <Sparkles className="size-3.5" aria-hidden />
-                  ) : a.kind === "client" ? (
-                    <Activity className="size-3.5" aria-hidden />
-                  ) : (
-                    <CheckCircle2 className="size-3.5" aria-hidden />
-                  )}
-                </span>
-                <div className="min-w-0">
-                  <p className="text-sm">
-                    <span className="font-medium">{a.who}</span>{" "}
-                    <span className="text-muted-foreground">{a.what}</span>
-                  </p>
-                  <p className="text-xs text-muted-foreground">{a.when}</p>
-                </div>
+        <Section title="Recent activity" description="Customers, team, and AI" className="lg:col-span-2" padded={false}>
+          <ul className="divide-y divide-border">
+            {activity.map((a, i) => (
+              <li key={i} className="flex items-start gap-3 px-6 py-4">
+                {a.kind === "ai" ? (
+                  <div className="mt-0.5 flex size-7 items-center justify-center rounded-full bg-muted">
+                    <Sparkles className="size-3.5 text-signal" aria-hidden />
+                  </div>
+                ) : (
+                  <Avatar className="mt-0.5 size-7">
+                    <AvatarFallback className="text-[10px]">
+                      {a.who
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .slice(0, 2)}
+                    </AvatarFallback>
+                  </Avatar>
+                )}
+                <p className="flex-1 text-sm leading-relaxed">
+                  <span className="font-medium">{a.who}</span>{" "}
+                  <span className="text-muted-foreground">{a.what}</span>
+                </p>
+                <span className="whitespace-nowrap text-xs text-muted-foreground">{a.when}</span>
               </li>
             ))}
           </ul>
         </Section>
 
-        <Section title="Upcoming deadlines" description="Next 3 weeks">
-          <ul className="space-y-4">
-            {deadlines.map((d) => (
-              <li key={d.id} className="flex items-start gap-3">
-                <CalendarClock
-                  className={
-                    d.urgency === "high"
-                      ? "mt-0.5 size-4 text-destructive"
-                      : d.urgency === "med"
-                        ? "mt-0.5 size-4 text-warning"
-                        : "mt-0.5 size-4 text-muted-foreground"
-                  }
-                  aria-hidden
-                />
-                <div>
-                  <p className="text-sm font-medium">{d.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {d.when} · {d.owner}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </Section>
+        <div className="space-y-6">
+          <Section title="Upcoming deadlines" padded={false}>
+            <ul className="divide-y divide-border">
+              {deadlines.map((d) => (
+                <li key={d.title} className="flex items-center gap-3 px-6 py-3.5">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{d.title}</p>
+                    <p className="text-xs text-muted-foreground">{d.date}</p>
+                  </div>
+                  <StatusPill status={d.urgency === "urgent" ? "Overdue" : d.urgency === "soon" ? "Pending" : "On track"} />
+                </li>
+              ))}
+            </ul>
+          </Section>
+
+          <Section title="Crew status" padded={false}>
+            <ul className="divide-y divide-border">
+              {employees.slice(0, 5).map((e) => (
+                <li key={e.name} className="flex items-center gap-3 px-6 py-3">
+                  <Avatar className="size-7">
+                    <AvatarFallback className="text-[10px]">
+                      {e.name.split(" ").map((n) => n[0]).join("")}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{e.name}</p>
+                    <p className="truncate text-xs text-muted-foreground">{e.role}</p>
+                  </div>
+                  <span className="text-xs text-muted-foreground">{e.status}</span>
+                </li>
+              ))}
+            </ul>
+          </Section>
+        </div>
       </div>
     </>
   );
