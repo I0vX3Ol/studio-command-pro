@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { toast } from "sonner";
 import {
   Area,
   AreaChart,
@@ -31,9 +32,15 @@ export const Route = createFileRoute("/app/")({
   head: () => ({
     meta: [
       { title: "Dashboard — BuildFlow AI" },
-      { name: "description", content: "Revenue, projects, crews, equipment, and AI activity at a glance." },
+      {
+        name: "description",
+        content: "Revenue, projects, crews, equipment, and AI activity at a glance.",
+      },
       { property: "og:title", content: "Dashboard — BuildFlow AI" },
-      { property: "og:description", content: "Revenue, projects, crews, equipment, and AI activity at a glance." },
+      {
+        property: "og:description",
+        content: "Revenue, projects, crews, equipment, and AI activity at a glance.",
+      },
     ],
   }),
   component: Dashboard,
@@ -71,11 +78,15 @@ function Dashboard() {
         description="Northline is tracking 4.2% ahead of forecast this month. Two invoices need escalation today."
         actions={
           <>
-            <Button variant="outline" className="rounded-xl">
+            <Button
+              variant="outline"
+              className="rounded-xl"
+              onClick={() => toast.success("Dashboard export queued")}
+            >
               <Download className="size-4" />
               Export
             </Button>
-            <Button className="rounded-xl">
+            <Button className="rounded-xl" onClick={() => toast.success("New project form opened")}>
               <Plus className="size-4" />
               New project
             </Button>
@@ -160,7 +171,11 @@ function Dashboard() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <Section title="Project completion" description="Planned vs. actual, current quarter" className="lg:col-span-2">
+        <Section
+          title="Project completion"
+          description="Planned vs. actual, current quarter"
+          className="lg:col-span-2"
+        >
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={completionSeries} margin={{ left: -20, right: 8, top: 8 }}>
@@ -168,8 +183,20 @@ function Dashboard() {
                 <XAxis dataKey="week" {...axis} />
                 <YAxis {...axis} unit="%" />
                 <ChartTooltip />
-                <Line type="monotone" dataKey="planned" stroke="var(--color-chart-5)" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="actual" stroke="var(--color-chart-3)" strokeWidth={2} dot={false} />
+                <Line
+                  type="monotone"
+                  dataKey="planned"
+                  stroke="var(--color-chart-5)"
+                  strokeWidth={2}
+                  dot={false}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="actual"
+                  stroke="var(--color-chart-3)"
+                  strokeWidth={2}
+                  dot={false}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -191,7 +218,12 @@ function Dashboard() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <Section title="Recent activity" description="Customers, team, and AI" className="lg:col-span-2" padded={false}>
+        <Section
+          title="Recent activity"
+          description="Customers, team, and AI"
+          className="lg:col-span-2"
+          padded={false}
+        >
           <ul className="divide-y divide-border">
             {activity.map((a, i) => (
               <li key={i} className="flex items-start gap-3 px-6 py-4">
@@ -229,7 +261,15 @@ function Dashboard() {
                     <p className="truncate text-sm font-medium">{d.title}</p>
                     <p className="text-xs text-muted-foreground">{d.date}</p>
                   </div>
-                  <StatusPill status={d.urgency === "urgent" ? "Overdue" : d.urgency === "soon" ? "Pending" : "On track"} />
+                  <StatusPill
+                    status={
+                      d.urgency === "urgent"
+                        ? "Overdue"
+                        : d.urgency === "soon"
+                          ? "Pending"
+                          : "On track"
+                    }
+                  />
                 </li>
               ))}
             </ul>
@@ -241,7 +281,10 @@ function Dashboard() {
                 <li key={e.name} className="flex items-center gap-3 px-6 py-3">
                   <Avatar className="size-7">
                     <AvatarFallback className="text-[10px]">
-                      {e.name.split(" ").map((n) => n[0]).join("")}
+                      {e.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
                     </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0 flex-1">

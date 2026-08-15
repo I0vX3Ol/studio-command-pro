@@ -1,7 +1,8 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
+import { toast } from "sonner";
 import { navGroups } from "@/lib/nav";
-import { currentUser, org } from "@/lib/mock-data";
+import { activity, currentUser, org } from "@/lib/mock-data";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -95,7 +96,12 @@ function AppLayout() {
         <header className="glass sticky top-0 z-20 flex h-16 items-center gap-3 border-b px-4 sm:px-6">
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open navigation">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="lg:hidden"
+                aria-label="Open navigation"
+              >
                 <Menu className="size-5" />
               </Button>
             </SheetTrigger>
@@ -129,10 +135,42 @@ function AppLayout() {
             <Button variant="ghost" size="icon" onClick={toggle} aria-label="Toggle theme">
               {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
             </Button>
-            <Button variant="ghost" size="icon" aria-label="Notifications" className="relative">
-              <Bell className="size-4" />
-              <span className="absolute right-2 top-2 size-1.5 rounded-full bg-signal" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="Notifications" className="relative">
+                  <Bell className="size-4" />
+                  <span className="absolute right-2 top-2 size-1.5 rounded-full bg-signal" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80 p-0">
+                <div className="flex items-center justify-between px-3 py-2.5">
+                  <p className="text-sm font-semibold">Notifications</p>
+                  <button
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                    onClick={() => toast.success("All notifications marked as read")}
+                  >
+                    Mark all read
+                  </button>
+                </div>
+                <DropdownMenuSeparator className="my-0" />
+                <ul className="max-h-80 overflow-y-auto py-1">
+                  {activity.slice(0, 5).map((a, i) => (
+                    <li key={i}>
+                      <Link
+                        to="/app"
+                        className="flex flex-col gap-0.5 px-3 py-2.5 text-sm hover:bg-accent"
+                      >
+                        <span className="leading-snug">
+                          <span className="font-medium">{a.who}</span>{" "}
+                          <span className="text-muted-foreground">{a.what}</span>
+                        </span>
+                        <span className="text-xs text-muted-foreground">{a.when}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button aria-label="Account menu" className="ml-1 rounded-full">
@@ -169,7 +207,11 @@ function AppLayout() {
         </main>
       </div>
 
-      <CommandPalette open={palette.open} setOpen={palette.setOpen} onAskAI={() => ai.setOpen(true)} />
+      <CommandPalette
+        open={palette.open}
+        setOpen={palette.setOpen}
+        onAskAI={() => ai.setOpen(true)}
+      />
       <AIPanel open={ai.open} setOpen={ai.setOpen} />
 
       <Button
