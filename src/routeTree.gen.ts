@@ -15,10 +15,16 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppAnalyticsRouteImport } from './routes/app.analytics'
 import { Route as AppCrmRouteImport } from './routes/app.crm'
 import { Route as AppEquipmentRouteImport } from './routes/app.equipment'
 import { Route as AppEstimatingRouteImport } from './routes/app.estimating'
+import { Route as AppFinancialsRouteImport } from './routes/app.financials'
+import { Route as AppIntegrationsRouteImport } from './routes/app.integrations'
+import { Route as AppPortalRouteImport } from './routes/app.portal'
 import { Route as AppProjectsRouteImport } from './routes/app.projects'
+import { Route as AppSettingsRouteImport } from './routes/app.settings'
+import { Route as AppTeamRouteImport } from './routes/app.team'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -50,6 +56,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppCrmRoute = AppCrmRouteImport.update({
   id: '/crm',
   path: '/crm',
@@ -65,9 +76,34 @@ const AppEstimatingRoute = AppEstimatingRouteImport.update({
   path: '/estimating',
   getParentRoute: () => AppRoute,
 } as any)
+const AppFinancialsRoute = AppFinancialsRouteImport.update({
+  id: '/financials',
+  path: '/financials',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppIntegrationsRoute = AppIntegrationsRouteImport.update({
+  id: '/integrations',
+  path: '/integrations',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPortalRoute = AppPortalRouteImport.update({
+  id: '/portal',
+  path: '/portal',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppProjectsRoute = AppProjectsRouteImport.update({
   id: '/projects',
   path: '/projects',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTeamRoute = AppTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
   getParentRoute: () => AppRoute,
 } as any)
 
@@ -77,10 +113,16 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/app/analytics': typeof AppAnalyticsRoute
   '/app/crm': typeof AppCrmRoute
   '/app/equipment': typeof AppEquipmentRoute
   '/app/estimating': typeof AppEstimatingRoute
+  '/app/financials': typeof AppFinancialsRoute
+  '/app/integrations': typeof AppIntegrationsRoute
+  '/app/portal': typeof AppPortalRoute
   '/app/projects': typeof AppProjectsRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/team': typeof AppTeamRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
@@ -88,10 +130,16 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/app/analytics': typeof AppAnalyticsRoute
   '/app/crm': typeof AppCrmRoute
   '/app/equipment': typeof AppEquipmentRoute
   '/app/estimating': typeof AppEstimatingRoute
+  '/app/financials': typeof AppFinancialsRoute
+  '/app/integrations': typeof AppIntegrationsRoute
+  '/app/portal': typeof AppPortalRoute
   '/app/projects': typeof AppProjectsRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/team': typeof AppTeamRoute
   '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
@@ -101,10 +149,16 @@ export interface FileRoutesById {
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/app/analytics': typeof AppAnalyticsRoute
   '/app/crm': typeof AppCrmRoute
   '/app/equipment': typeof AppEquipmentRoute
   '/app/estimating': typeof AppEstimatingRoute
+  '/app/financials': typeof AppFinancialsRoute
+  '/app/integrations': typeof AppIntegrationsRoute
+  '/app/portal': typeof AppPortalRoute
   '/app/projects': typeof AppProjectsRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/team': typeof AppTeamRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
@@ -115,10 +169,16 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/login'
     | '/signup'
+    | '/app/analytics'
     | '/app/crm'
     | '/app/equipment'
     | '/app/estimating'
+    | '/app/financials'
+    | '/app/integrations'
+    | '/app/portal'
     | '/app/projects'
+    | '/app/settings'
+    | '/app/team'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -126,10 +186,16 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/login'
     | '/signup'
+    | '/app/analytics'
     | '/app/crm'
     | '/app/equipment'
     | '/app/estimating'
+    | '/app/financials'
+    | '/app/integrations'
+    | '/app/portal'
     | '/app/projects'
+    | '/app/settings'
+    | '/app/team'
     | '/app'
   id:
     | '__root__'
@@ -138,10 +204,16 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/login'
     | '/signup'
+    | '/app/analytics'
     | '/app/crm'
     | '/app/equipment'
     | '/app/estimating'
+    | '/app/financials'
+    | '/app/integrations'
+    | '/app/portal'
     | '/app/projects'
+    | '/app/settings'
+    | '/app/team'
     | '/app/'
   fileRoutesById: FileRoutesById
 }
@@ -197,6 +269,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/analytics': {
+      id: '/app/analytics'
+      path: '/analytics'
+      fullPath: '/app/analytics'
+      preLoaderRoute: typeof AppAnalyticsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/crm': {
       id: '/app/crm'
       path: '/crm'
@@ -218,6 +297,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEstimatingRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/financials': {
+      id: '/app/financials'
+      path: '/financials'
+      fullPath: '/app/financials'
+      preLoaderRoute: typeof AppFinancialsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/integrations': {
+      id: '/app/integrations'
+      path: '/integrations'
+      fullPath: '/app/integrations'
+      preLoaderRoute: typeof AppIntegrationsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/portal': {
+      id: '/app/portal'
+      path: '/portal'
+      fullPath: '/app/portal'
+      preLoaderRoute: typeof AppPortalRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/projects': {
       id: '/app/projects'
       path: '/projects'
@@ -225,22 +325,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProjectsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/settings': {
+      id: '/app/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/team': {
+      id: '/app/team'
+      path: '/team'
+      fullPath: '/app/team'
+      preLoaderRoute: typeof AppTeamRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppAnalyticsRoute: typeof AppAnalyticsRoute
   AppCrmRoute: typeof AppCrmRoute
   AppEquipmentRoute: typeof AppEquipmentRoute
   AppEstimatingRoute: typeof AppEstimatingRoute
+  AppFinancialsRoute: typeof AppFinancialsRoute
+  AppIntegrationsRoute: typeof AppIntegrationsRoute
+  AppPortalRoute: typeof AppPortalRoute
   AppProjectsRoute: typeof AppProjectsRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppTeamRoute: typeof AppTeamRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAnalyticsRoute: AppAnalyticsRoute,
   AppCrmRoute: AppCrmRoute,
   AppEquipmentRoute: AppEquipmentRoute,
   AppEstimatingRoute: AppEstimatingRoute,
+  AppFinancialsRoute: AppFinancialsRoute,
+  AppIntegrationsRoute: AppIntegrationsRoute,
+  AppPortalRoute: AppPortalRoute,
   AppProjectsRoute: AppProjectsRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppTeamRoute: AppTeamRoute,
   AppIndexRoute: AppIndexRoute,
 }
 
