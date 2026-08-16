@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -117,7 +123,12 @@ export function AIPanel({ open, setOpen }: { open: boolean; setOpen: (v: boolean
             aria-label="Ask BuildFlow AI"
             className="h-11 rounded-xl"
           />
-          <Button type="submit" size="icon" className="size-11 shrink-0 rounded-xl" aria-label="Send">
+          <Button
+            type="submit"
+            size="icon"
+            className="size-11 shrink-0 rounded-xl"
+            aria-label="Send"
+          >
             <ArrowUp className="size-4" />
           </Button>
         </form>

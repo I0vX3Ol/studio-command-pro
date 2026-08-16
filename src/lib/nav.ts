@@ -20,14 +20,24 @@ export const navGroups: { group: string; items: NavItem[] }[] = [
     group: "Overview",
     items: [
       { label: "Dashboard", to: "/app", icon: LayoutDashboard, hint: "Company pulse" },
-      { label: "Analytics", to: "/app/analytics", icon: ChartNoAxesColumn, hint: "Performance & forecasting" },
+      {
+        label: "Analytics",
+        to: "/app/analytics",
+        icon: ChartNoAxesColumn,
+        hint: "Performance & forecasting",
+      },
     ],
   },
   {
     group: "Revenue",
     items: [
       { label: "CRM", to: "/app/crm", icon: Users, hint: "Customers & pipeline" },
-      { label: "AI Estimating", to: "/app/estimating", icon: Calculator, hint: "Takeoffs & proposals" },
+      {
+        label: "AI Estimating",
+        to: "/app/estimating",
+        icon: Calculator,
+        hint: "Takeoffs & proposals",
+      },
       { label: "Financials", to: "/app/financials", icon: Receipt, hint: "Invoices, AR/AP, cash" },
     ],
   },

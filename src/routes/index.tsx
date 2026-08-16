@@ -34,12 +34,36 @@ export const Route = createFileRoute("/")({
 });
 
 const features = [
-  { icon: Calculator, title: "AI estimating", desc: "Drop in a blueprint set and get a defensible labor, material, and risk-scored estimate in minutes." },
-  { icon: HardHat, title: "Project execution", desc: "Kanban, Gantt, daily logs, punch lists, and change orders that stay in sync with the field." },
-  { icon: Users, title: "CRM built for bids", desc: "Pipeline, call and email history, files, and AI-written account summaries." },
-  { icon: Receipt, title: "Financial control", desc: "Invoices, AR/AP, purchase orders, budgets, and a live cash-flow picture." },
-  { icon: Truck, title: "Fleet & equipment", desc: "Utilization, maintenance schedules, fuel, and inspection reminders per asset." },
-  { icon: ChartNoAxesColumn, title: "Analytics & forecasting", desc: "Win rate, margin trend, productivity, and revenue scenarios you can plan against." },
+  {
+    icon: Calculator,
+    title: "AI estimating",
+    desc: "Drop in a blueprint set and get a defensible labor, material, and risk-scored estimate in minutes.",
+  },
+  {
+    icon: HardHat,
+    title: "Project execution",
+    desc: "Kanban, Gantt, daily logs, punch lists, and change orders that stay in sync with the field.",
+  },
+  {
+    icon: Users,
+    title: "CRM built for bids",
+    desc: "Pipeline, call and email history, files, and AI-written account summaries.",
+  },
+  {
+    icon: Receipt,
+    title: "Financial control",
+    desc: "Invoices, AR/AP, purchase orders, budgets, and a live cash-flow picture.",
+  },
+  {
+    icon: Truck,
+    title: "Fleet & equipment",
+    desc: "Utilization, maintenance schedules, fuel, and inspection reminders per asset.",
+  },
+  {
+    icon: ChartNoAxesColumn,
+    title: "Analytics & forecasting",
+    desc: "Win rate, margin trend, productivity, and revenue scenarios you can plan against.",
+  },
 ];
 
 function Landing() {
@@ -52,9 +76,15 @@ function Landing() {
           </div>
           <span className="text-sm font-semibold tracking-tight">BuildFlow AI</span>
           <nav className="ml-8 hidden items-center gap-6 text-sm text-muted-foreground md:flex">
-            <a href="#product" className="transition-colors hover:text-foreground">Product</a>
-            <a href="#platform" className="transition-colors hover:text-foreground">Platform</a>
-            <Link to="/app" className="transition-colors hover:text-foreground">Live demo</Link>
+            <a href="#product" className="transition-colors hover:text-foreground">
+              Product
+            </a>
+            <a href="#platform" className="transition-colors hover:text-foreground">
+              Platform
+            </a>
+            <Link to="/app" className="transition-colors hover:text-foreground">
+              Live demo
+            </Link>
           </nav>
           <div className="ml-auto flex items-center gap-2">
             <Button asChild variant="ghost" className="rounded-xl">
@@ -131,8 +161,8 @@ function Landing() {
                 Enterprise-grade from day one.
               </h2>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                SSO, role-based permissions, audit trails, and SOC 2 controls. Connects to QuickBooks,
-                Stripe, Google Calendar, Slack, and the rest of your stack.
+                SSO, role-based permissions, audit trails, and SOC 2 controls. Connects to
+                QuickBooks, Stripe, Google Calendar, Slack, and the rest of your stack.
               </p>
             </div>
             <Button asChild size="lg" className="h-12 rounded-xl px-6">
@@ -146,8 +176,12 @@ function Landing() {
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-6 py-10 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>© 2026 BuildFlow AI</p>
           <nav className="flex items-center gap-4" aria-label="Legal">
-            <Link to="/legal/privacy" className="hover:text-foreground">Privacy</Link>
-            <Link to="/legal/terms" className="hover:text-foreground">Terms</Link>
+            <Link to="/legal/privacy" className="hover:text-foreground">
+              Privacy
+            </Link>
+            <Link to="/legal/terms" className="hover:text-foreground">
+              Terms
+            </Link>
           </nav>
         </div>
       </footer>

@@ -260,8 +260,20 @@ export const kanbanColumns = [
     id: "backlog",
     title: "Backlog",
     cards: [
-      { id: "k1", title: "Order curtain wall glazing", project: "Block 7", owner: "AS", tag: "Procurement" },
-      { id: "k2", title: "Confirm elevator inspection slot", project: "Wing C", owner: "DO", tag: "Compliance" },
+      {
+        id: "k1",
+        title: "Order curtain wall glazing",
+        project: "Block 7",
+        owner: "AS",
+        tag: "Procurement",
+      },
+      {
+        id: "k2",
+        title: "Confirm elevator inspection slot",
+        project: "Wing C",
+        owner: "DO",
+        tag: "Compliance",
+      },
     ],
   },
   {
@@ -277,20 +289,40 @@ export const kanbanColumns = [
     id: "progress",
     title: "In progress",
     cards: [
-      { id: "k6", title: "Rooftop railing fabrication", project: "Rooftop Bar", owner: "MR", tag: "Subs" },
+      {
+        id: "k6",
+        title: "Rooftop railing fabrication",
+        project: "Rooftop Bar",
+        owner: "MR",
+        tag: "Subs",
+      },
       { id: "k7", title: "Med-gas rough-in", project: "Wing C", owner: "DO", tag: "Field" },
     ],
   },
   {
     id: "review",
     title: "Review",
-    cards: [{ id: "k8", title: "Change order #14 pricing", project: "Rooftop Bar", owner: "AS", tag: "Finance" }],
+    cards: [
+      {
+        id: "k8",
+        title: "Change order #14 pricing",
+        project: "Rooftop Bar",
+        owner: "AS",
+        tag: "Finance",
+      },
+    ],
   },
   {
     id: "done",
     title: "Done",
     cards: [
-      { id: "k9", title: "Fire alarm pre-test", project: "Vine St.", owner: "JP", tag: "Compliance" },
+      {
+        id: "k9",
+        title: "Fire alarm pre-test",
+        project: "Vine St.",
+        owner: "JP",
+        tag: "Compliance",
+      },
       { id: "k10", title: "Site fence relocation", project: "Block 7", owner: "MR", tag: "Field" },
     ],
   },
@@ -338,10 +370,34 @@ export const dailyLogs = [
 ];
 
 export const changeOrders = [
-  { id: "CO-014", project: "Harbor Rooftop Bar", desc: "Upgraded railing spec to 316 stainless", amount: 28400, status: "Pending" },
-  { id: "CO-013", project: "Meridian Wing C", desc: "Additional isolation room dampers", amount: 61200, status: "Approved" },
-  { id: "CO-012", project: "Ridgeline Block 7", desc: "Rock excavation overage", amount: 47800, status: "Approved" },
-  { id: "CO-011", project: "Vine St. Kitchen", desc: "Grease interceptor relocation", amount: -6400, status: "Rejected" },
+  {
+    id: "CO-014",
+    project: "Harbor Rooftop Bar",
+    desc: "Upgraded railing spec to 316 stainless",
+    amount: 28400,
+    status: "Pending",
+  },
+  {
+    id: "CO-013",
+    project: "Meridian Wing C",
+    desc: "Additional isolation room dampers",
+    amount: 61200,
+    status: "Approved",
+  },
+  {
+    id: "CO-012",
+    project: "Ridgeline Block 7",
+    desc: "Rock excavation overage",
+    amount: 47800,
+    status: "Approved",
+  },
+  {
+    id: "CO-011",
+    project: "Vine St. Kitchen",
+    desc: "Grease interceptor relocation",
+    amount: -6400,
+    status: "Rejected",
+  },
 ];
 
 export const punchList = [
@@ -352,20 +408,118 @@ export const punchList = [
 ];
 
 export const equipment = [
-  { id: "EQ-1042", name: "CAT 320 Excavator", type: "Heavy", site: "Block 7", status: "In use", util: 86, hours: 4120, service: "Sep 02", fuel: 412 },
-  { id: "EQ-2210", name: "Genie S-65 Boom Lift", type: "Aerial", site: "Wing C", status: "In use", util: 71, hours: 1860, service: "Aug 24", fuel: 138 },
-  { id: "EQ-3391", name: "Bobcat T76 Track Loader", type: "Compact", site: "Yard", status: "Idle", util: 34, hours: 2540, service: "Oct 11", fuel: 96 },
-  { id: "EQ-4407", name: "Multiquip 45kW Generator", type: "Power", site: "Rooftop Bar", status: "In use", util: 62, hours: 980, service: "Sep 19", fuel: 260 },
-  { id: "EQ-5518", name: "JLG 1055 Telehandler", type: "Lift", site: "Block 7", status: "Service", util: 12, hours: 3310, service: "Aug 15", fuel: 188 },
+  {
+    id: "EQ-1042",
+    name: "CAT 320 Excavator",
+    type: "Heavy",
+    site: "Block 7",
+    status: "In use",
+    util: 86,
+    hours: 4120,
+    service: "Sep 02",
+    fuel: 412,
+  },
+  {
+    id: "EQ-2210",
+    name: "Genie S-65 Boom Lift",
+    type: "Aerial",
+    site: "Wing C",
+    status: "In use",
+    util: 71,
+    hours: 1860,
+    service: "Aug 24",
+    fuel: 138,
+  },
+  {
+    id: "EQ-3391",
+    name: "Bobcat T76 Track Loader",
+    type: "Compact",
+    site: "Yard",
+    status: "Idle",
+    util: 34,
+    hours: 2540,
+    service: "Oct 11",
+    fuel: 96,
+  },
+  {
+    id: "EQ-4407",
+    name: "Multiquip 45kW Generator",
+    type: "Power",
+    site: "Rooftop Bar",
+    status: "In use",
+    util: 62,
+    hours: 980,
+    service: "Sep 19",
+    fuel: 260,
+  },
+  {
+    id: "EQ-5518",
+    name: "JLG 1055 Telehandler",
+    type: "Lift",
+    site: "Block 7",
+    status: "Service",
+    util: 12,
+    hours: 3310,
+    service: "Aug 15",
+    fuel: 188,
+  },
 ];
 
 export const employees = [
-  { name: "Dele Osei", role: "Senior Project Manager", crew: "Healthcare", status: "On site", hours: 38, certs: ["OSHA 30", "CHC"], rating: 4.9 },
-  { name: "Mara Reyes", role: "Superintendent", crew: "Commercial", status: "On site", hours: 42, certs: ["OSHA 30", "First Aid"], rating: 4.8 },
-  { name: "Jae Park", role: "Project Manager", crew: "Hospitality", status: "Remote", hours: 36, certs: ["OSHA 10"], rating: 4.6 },
-  { name: "Luis Ferrer", role: "Foreman", crew: "Concrete", status: "On site", hours: 44, certs: ["OSHA 30", "Rigging"], rating: 4.7 },
-  { name: "Nina Alvarez", role: "Estimator", crew: "Preconstruction", status: "Office", hours: 40, certs: ["LEED AP"], rating: 4.9 },
-  { name: "Grant Whitmore", role: "Safety Manager", crew: "Company-wide", status: "PTO", hours: 0, certs: ["OSHA 500", "CHST"], rating: 4.8 },
+  {
+    name: "Dele Osei",
+    role: "Senior Project Manager",
+    crew: "Healthcare",
+    status: "On site",
+    hours: 38,
+    certs: ["OSHA 30", "CHC"],
+    rating: 4.9,
+  },
+  {
+    name: "Mara Reyes",
+    role: "Superintendent",
+    crew: "Commercial",
+    status: "On site",
+    hours: 42,
+    certs: ["OSHA 30", "First Aid"],
+    rating: 4.8,
+  },
+  {
+    name: "Jae Park",
+    role: "Project Manager",
+    crew: "Hospitality",
+    status: "Remote",
+    hours: 36,
+    certs: ["OSHA 10"],
+    rating: 4.6,
+  },
+  {
+    name: "Luis Ferrer",
+    role: "Foreman",
+    crew: "Concrete",
+    status: "On site",
+    hours: 44,
+    certs: ["OSHA 30", "Rigging"],
+    rating: 4.7,
+  },
+  {
+    name: "Nina Alvarez",
+    role: "Estimator",
+    crew: "Preconstruction",
+    status: "Office",
+    hours: 40,
+    certs: ["LEED AP"],
+    rating: 4.9,
+  },
+  {
+    name: "Grant Whitmore",
+    role: "Safety Manager",
+    crew: "Company-wide",
+    status: "PTO",
+    hours: 0,
+    certs: ["OSHA 500", "CHST"],
+    rating: 4.8,
+  },
 ];
 
 export const timeOff = [
@@ -375,24 +529,84 @@ export const timeOff = [
 ];
 
 export const invoices = [
-  { id: "INV-2041", customer: "Meridian Health Systems", amount: 412000, due: "Aug 02, 2026", status: "Overdue" },
-  { id: "INV-2038", customer: "Ridgeline Properties", amount: 286000, due: "Aug 20, 2026", status: "Sent" },
-  { id: "INV-2035", customer: "Harbor & Vine Hospitality", amount: 94500, due: "Aug 28, 2026", status: "Sent" },
-  { id: "INV-2029", customer: "Meridian Health Systems", amount: 331000, due: "Jul 30, 2026", status: "Paid" },
-  { id: "INV-2024", customer: "Alpine Civic Trust", amount: 58200, due: "Jul 12, 2026", status: "Overdue" },
+  {
+    id: "INV-2041",
+    customer: "Meridian Health Systems",
+    amount: 412000,
+    due: "Aug 02, 2026",
+    status: "Overdue",
+  },
+  {
+    id: "INV-2038",
+    customer: "Ridgeline Properties",
+    amount: 286000,
+    due: "Aug 20, 2026",
+    status: "Sent",
+  },
+  {
+    id: "INV-2035",
+    customer: "Harbor & Vine Hospitality",
+    amount: 94500,
+    due: "Aug 28, 2026",
+    status: "Sent",
+  },
+  {
+    id: "INV-2029",
+    customer: "Meridian Health Systems",
+    amount: 331000,
+    due: "Jul 30, 2026",
+    status: "Paid",
+  },
+  {
+    id: "INV-2024",
+    customer: "Alpine Civic Trust",
+    amount: 58200,
+    due: "Jul 12, 2026",
+    status: "Overdue",
+  },
 ];
 
 export const expenses = [
-  { vendor: "Front Range Concrete", category: "Materials", amount: 128400, date: "Aug 11", project: "Block 7" },
-  { vendor: "Summit Mechanical", category: "Subcontractor", amount: 214000, date: "Aug 09", project: "Wing C" },
-  { vendor: "Rocky Mountain Rentals", category: "Equipment", amount: 18600, date: "Aug 08", project: "Rooftop Bar" },
-  { vendor: "Bluebird Fuel", category: "Fuel", amount: 7420, date: "Aug 07", project: "Company-wide" },
+  {
+    vendor: "Front Range Concrete",
+    category: "Materials",
+    amount: 128400,
+    date: "Aug 11",
+    project: "Block 7",
+  },
+  {
+    vendor: "Summit Mechanical",
+    category: "Subcontractor",
+    amount: 214000,
+    date: "Aug 09",
+    project: "Wing C",
+  },
+  {
+    vendor: "Rocky Mountain Rentals",
+    category: "Equipment",
+    amount: 18600,
+    date: "Aug 08",
+    project: "Rooftop Bar",
+  },
+  {
+    vendor: "Bluebird Fuel",
+    category: "Fuel",
+    amount: 7420,
+    date: "Aug 07",
+    project: "Company-wide",
+  },
 ];
 
 export const purchaseOrders = [
   { id: "PO-8841", vendor: "Glasscraft Systems", amount: 342000, status: "Issued", eta: "Sep 08" },
   { id: "PO-8837", vendor: "Summit Mechanical", amount: 214000, status: "Partial", eta: "Aug 25" },
-  { id: "PO-8829", vendor: "Front Range Concrete", amount: 128400, status: "Received", eta: "Delivered" },
+  {
+    id: "PO-8829",
+    vendor: "Front Range Concrete",
+    amount: 128400,
+    status: "Received",
+    eta: "Delivered",
+  },
 ];
 
 export const cashFlow = [
@@ -404,9 +618,33 @@ export const cashFlow = [
 ];
 
 export const estimates = [
-  { id: "EST-3312", project: "Kestrel Warehouse Retrofit", customer: "Kestrel Industrial", total: 890000, margin: 18.4, risk: "Medium", status: "Draft" },
-  { id: "EST-3309", project: "Meridian Wing C — Phase 2", customer: "Meridian Health Systems", total: 2100000, margin: 21.2, risk: "Low", status: "Sent" },
-  { id: "EST-3301", project: "Harbor Rooftop Bar", customer: "Harbor & Vine", total: 540000, margin: 15.1, risk: "High", status: "Approved" },
+  {
+    id: "EST-3312",
+    project: "Kestrel Warehouse Retrofit",
+    customer: "Kestrel Industrial",
+    total: 890000,
+    margin: 18.4,
+    risk: "Medium",
+    status: "Draft",
+  },
+  {
+    id: "EST-3309",
+    project: "Meridian Wing C — Phase 2",
+    customer: "Meridian Health Systems",
+    total: 2100000,
+    margin: 21.2,
+    risk: "Low",
+    status: "Sent",
+  },
+  {
+    id: "EST-3301",
+    project: "Harbor Rooftop Bar",
+    customer: "Harbor & Vine",
+    total: 540000,
+    margin: 15.1,
+    risk: "High",
+    status: "Approved",
+  },
 ];
 
 export const estimateBreakdown = [
@@ -418,24 +656,79 @@ export const estimateBreakdown = [
 ];
 
 export const estimateRevisions = [
-  { rev: "R3", author: "Nina Alvarez", date: "Aug 12", note: "Applied 4% steel escalation, tightened crew loading" },
-  { rev: "R2", author: "BuildFlow AI", date: "Aug 10", note: "Auto-extracted 214 quantities from blueprint set A-101 → A-118" },
-  { rev: "R1", author: "Nina Alvarez", date: "Aug 08", note: "Initial takeoff from owner-provided PDF" },
+  {
+    rev: "R3",
+    author: "Nina Alvarez",
+    date: "Aug 12",
+    note: "Applied 4% steel escalation, tightened crew loading",
+  },
+  {
+    rev: "R2",
+    author: "BuildFlow AI",
+    date: "Aug 10",
+    note: "Auto-extracted 214 quantities from blueprint set A-101 → A-118",
+  },
+  {
+    rev: "R1",
+    author: "Nina Alvarez",
+    date: "Aug 08",
+    note: "Initial takeoff from owner-provided PDF",
+  },
 ];
 
 export const activity = [
-  { who: "Dana Whitfield", what: "approved change order CO-012", when: "12 min ago", kind: "customer" as const },
-  { who: "BuildFlow AI", what: "flagged a 9-day slip risk on Meridian Imaging Suite", when: "44 min ago", kind: "ai" as const },
-  { who: "Mara Reyes", what: "uploaded 24 jobsite photos to Block 7", when: "1 hr ago", kind: "team" as const },
-  { who: "BuildFlow AI", what: "drafted a follow-up email to Kestrel Industrial", when: "2 hr ago", kind: "ai" as const },
-  { who: "Miles Okafor", what: "paid INV-2029 · $331,000", when: "4 hr ago", kind: "customer" as const },
-  { who: "Nina Alvarez", what: "published estimate EST-3309 to the client portal", when: "Yesterday", kind: "team" as const },
+  {
+    who: "Dana Whitfield",
+    what: "approved change order CO-012",
+    when: "12 min ago",
+    kind: "customer" as const,
+  },
+  {
+    who: "BuildFlow AI",
+    what: "flagged a 9-day slip risk on Meridian Imaging Suite",
+    when: "44 min ago",
+    kind: "ai" as const,
+  },
+  {
+    who: "Mara Reyes",
+    what: "uploaded 24 jobsite photos to Block 7",
+    when: "1 hr ago",
+    kind: "team" as const,
+  },
+  {
+    who: "BuildFlow AI",
+    what: "drafted a follow-up email to Kestrel Industrial",
+    when: "2 hr ago",
+    kind: "ai" as const,
+  },
+  {
+    who: "Miles Okafor",
+    what: "paid INV-2029 · $331,000",
+    when: "4 hr ago",
+    kind: "customer" as const,
+  },
+  {
+    who: "Nina Alvarez",
+    what: "published estimate EST-3309 to the client portal",
+    when: "Yesterday",
+    kind: "team" as const,
+  },
 ];
 
 export const deadlines = [
-  { title: "Meridian Wing C — envelope dry-in", date: "Nov 20", owner: "DO", urgency: "normal" as const },
+  {
+    title: "Meridian Wing C — envelope dry-in",
+    date: "Nov 20",
+    owner: "DO",
+    urgency: "normal" as const,
+  },
   { title: "Block 7 permit renewal", date: "Aug 19", owner: "AS", urgency: "urgent" as const },
-  { title: "Rooftop Bar final inspection", date: "Sep 09", owner: "MR", urgency: "normal" as const },
+  {
+    title: "Rooftop Bar final inspection",
+    date: "Sep 09",
+    owner: "MR",
+    urgency: "normal" as const,
+  },
   { title: "Q3 tax filing package", date: "Sep 15", owner: "AS", urgency: "soon" as const },
 ];
 
@@ -465,19 +758,84 @@ export const forecastSeries = [
 ];
 
 export const integrations = [
-  { name: "QuickBooks", category: "Accounting", connected: true, desc: "Sync invoices, expenses, and the chart of accounts." },
-  { name: "Stripe", category: "Payments", connected: true, desc: "Collect card and ACH payments from the client portal." },
-  { name: "Google Calendar", category: "Scheduling", connected: true, desc: "Two-way sync for crew and inspection scheduling." },
-  { name: "Outlook", category: "Scheduling", connected: false, desc: "Sync calendars and log email threads to customers." },
-  { name: "Microsoft Teams", category: "Communication", connected: false, desc: "Post project alerts to channels." },
-  { name: "Slack", category: "Communication", connected: true, desc: "Daily log digests and overdue-invoice alerts." },
-  { name: "Dropbox", category: "Files", connected: false, desc: "Mirror project folders and photo archives." },
-  { name: "Google Drive", category: "Files", connected: true, desc: "Attach drawings and proposals from Drive." },
-  { name: "OneDrive", category: "Files", connected: false, desc: "Sync closeout document packages." },
-  { name: "Twilio", category: "Messaging", connected: true, desc: "SMS reminders for inspections and crew dispatch." },
-  { name: "SendGrid", category: "Messaging", connected: true, desc: "Transactional email for proposals and invoices." },
-  { name: "OpenAI", category: "AI", connected: true, desc: "Powers estimating extraction and drafting." },
-  { name: "Anthropic", category: "AI", connected: true, desc: "Powers long-document analysis and risk review." },
+  {
+    name: "QuickBooks",
+    category: "Accounting",
+    connected: true,
+    desc: "Sync invoices, expenses, and the chart of accounts.",
+  },
+  {
+    name: "Stripe",
+    category: "Payments",
+    connected: true,
+    desc: "Collect card and ACH payments from the client portal.",
+  },
+  {
+    name: "Google Calendar",
+    category: "Scheduling",
+    connected: true,
+    desc: "Two-way sync for crew and inspection scheduling.",
+  },
+  {
+    name: "Outlook",
+    category: "Scheduling",
+    connected: false,
+    desc: "Sync calendars and log email threads to customers.",
+  },
+  {
+    name: "Microsoft Teams",
+    category: "Communication",
+    connected: false,
+    desc: "Post project alerts to channels.",
+  },
+  {
+    name: "Slack",
+    category: "Communication",
+    connected: true,
+    desc: "Daily log digests and overdue-invoice alerts.",
+  },
+  {
+    name: "Dropbox",
+    category: "Files",
+    connected: false,
+    desc: "Mirror project folders and photo archives.",
+  },
+  {
+    name: "Google Drive",
+    category: "Files",
+    connected: true,
+    desc: "Attach drawings and proposals from Drive.",
+  },
+  {
+    name: "OneDrive",
+    category: "Files",
+    connected: false,
+    desc: "Sync closeout document packages.",
+  },
+  {
+    name: "Twilio",
+    category: "Messaging",
+    connected: true,
+    desc: "SMS reminders for inspections and crew dispatch.",
+  },
+  {
+    name: "SendGrid",
+    category: "Messaging",
+    connected: true,
+    desc: "Transactional email for proposals and invoices.",
+  },
+  {
+    name: "OpenAI",
+    category: "AI",
+    connected: true,
+    desc: "Powers estimating extraction and drafting.",
+  },
+  {
+    name: "Anthropic",
+    category: "AI",
+    connected: true,
+    desc: "Powers long-document analysis and risk review.",
+  },
 ];
 
 export const apiKeys = [

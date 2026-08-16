@@ -159,7 +159,10 @@ export function StatusPill({ status }: { status: string }) {
   return (
     <Badge
       variant="outline"
-      className={cn("rounded-full bg-transparent font-medium", tone[status] ?? "text-muted-foreground")}
+      className={cn(
+        "rounded-full bg-transparent font-medium",
+        tone[status] ?? "text-muted-foreground",
+      )}
     >
       {status}
     </Badge>

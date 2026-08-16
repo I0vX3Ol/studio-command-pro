@@ -8,7 +8,14 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { currency, customers, pipeline } from "@/lib/mock-data";
 import {
   FileText,
@@ -26,9 +33,15 @@ export const Route = createFileRoute("/app/crm")({
   head: () => ({
     meta: [
       { title: "CRM — BuildFlow AI" },
-      { name: "description", content: "Customer profiles, lead pipeline, notes, tasks, and AI account summaries." },
+      {
+        name: "description",
+        content: "Customer profiles, lead pipeline, notes, tasks, and AI account summaries.",
+      },
       { property: "og:title", content: "CRM — BuildFlow AI" },
-      { property: "og:description", content: "Customer profiles, lead pipeline, and AI account summaries." },
+      {
+        property: "og:description",
+        content: "Customer profiles, lead pipeline, and AI account summaries.",
+      },
     ],
   }),
   component: CRMPage,
@@ -56,8 +69,12 @@ function CRMPage() {
 
       <Tabs defaultValue="accounts" className="space-y-6">
         <TabsList className="rounded-xl">
-          <TabsTrigger value="accounts" className="rounded-lg">Accounts</TabsTrigger>
-          <TabsTrigger value="pipeline" className="rounded-lg">Pipeline</TabsTrigger>
+          <TabsTrigger value="accounts" className="rounded-lg">
+            Accounts
+          </TabsTrigger>
+          <TabsTrigger value="pipeline" className="rounded-lg">
+            Pipeline
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="accounts" className="space-y-6">
@@ -65,7 +82,10 @@ function CRMPage() {
             <Section padded={false}>
               <div className="border-b border-border p-3">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+                  <Search
+                    className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                    aria-hidden
+                  />
                   <Input
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
@@ -86,12 +106,18 @@ function CRMPage() {
                     >
                       <Avatar className="size-8">
                         <AvatarFallback className="text-[10px]">
-                          {c.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                          {c.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .slice(0, 2)}
                         </AvatarFallback>
                       </Avatar>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium">{c.name}</p>
-                        <p className="num truncate text-xs text-muted-foreground">{currency(c.value)}</p>
+                        <p className="num truncate text-xs text-muted-foreground">
+                          {currency(c.value)}
+                        </p>
                       </div>
                       <StatusPill status={c.status} />
                     </button>
@@ -109,9 +135,18 @@ function CRMPage() {
                       {selected.contact} · Customer since {selected.since}
                     </p>
                     <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
-                      <span className="inline-flex items-center gap-1.5"><Mail className="size-3.5" />{selected.email}</span>
-                      <span className="inline-flex items-center gap-1.5"><Phone className="size-3.5" />{selected.phone}</span>
-                      <span className="inline-flex items-center gap-1.5"><MapPin className="size-3.5" />{selected.city}</span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <Mail className="size-3.5" />
+                        {selected.email}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <Phone className="size-3.5" />
+                        {selected.phone}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <MapPin className="size-3.5" />
+                        {selected.city}
+                      </span>
                     </div>
                   </div>
                   <div className="text-right">
@@ -140,7 +175,9 @@ function CRMPage() {
                     ].map((e) => (
                       <li key={e.t + e.w} className="px-6 py-3.5">
                         <p className="text-sm font-medium">{e.t}</p>
-                        <p className="text-xs text-muted-foreground">{e.d} · {e.w}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {e.d} · {e.w}
+                        </p>
                       </li>
                     ))}
                   </ul>
@@ -149,7 +186,11 @@ function CRMPage() {
                 <Section title="Notes & tasks">
                   <Textarea placeholder="Add a note…" className="min-h-24 rounded-xl" />
                   <div className="mt-3 flex justify-end">
-                    <Button size="sm" className="rounded-lg" onClick={() => toast.success("Note saved")}>
+                    <Button
+                      size="sm"
+                      className="rounded-lg"
+                      onClick={() => toast.success("Note saved")}
+                    >
                       Save note
                     </Button>
                   </div>
@@ -171,13 +212,24 @@ function CRMPage() {
                   <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-10 text-center">
                     <UploadCloud className="size-5 text-muted-foreground" aria-hidden />
                     <p className="mt-2 text-sm text-muted-foreground">Drag files or photos here</p>
-                    <Button variant="outline" size="sm" className="mt-3 rounded-lg" onClick={() => toast.success("Upload started")}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-3 rounded-lg"
+                      onClick={() => toast.success("Upload started")}
+                    >
                       Browse files
                     </Button>
                   </div>
                   <ul className="mt-4 space-y-2 text-sm">
-                    <li className="flex items-center gap-2"><FileText className="size-4 text-muted-foreground" />Contract — executed.pdf</li>
-                    <li className="flex items-center gap-2"><ImageIcon className="size-4 text-muted-foreground" />Site photos — Aug 11 (24)</li>
+                    <li className="flex items-center gap-2">
+                      <FileText className="size-4 text-muted-foreground" />
+                      Contract — executed.pdf
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <ImageIcon className="size-4 text-muted-foreground" />
+                      Site photos — Aug 11 (24)
+                    </li>
                   </ul>
                 </Section>
 
@@ -205,16 +257,23 @@ function CRMPage() {
               <div key={col.stage} className="panel p-4">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-semibold">{col.stage}</p>
-                  <Badge variant="secondary" className="rounded-full">{col.deals.length}</Badge>
+                  <Badge variant="secondary" className="rounded-full">
+                    {col.deals.length}
+                  </Badge>
                 </div>
                 <p className="num mt-1 text-xs text-muted-foreground">
                   {currency(col.deals.reduce((s, d) => s + d.value, 0))}
                 </p>
                 <ul className="mt-4 space-y-3">
                   {col.deals.map((d) => (
-                    <li key={d.name} className="rounded-xl border border-border bg-background p-3 transition-shadow hover:shadow-soft">
+                    <li
+                      key={d.name}
+                      className="rounded-xl border border-border bg-background p-3 transition-shadow hover:shadow-soft"
+                    >
                       <p className="text-sm font-medium leading-snug">{d.name}</p>
-                      <p className="num mt-1.5 text-xs text-muted-foreground">{currency(d.value)}</p>
+                      <p className="num mt-1.5 text-xs text-muted-foreground">
+                        {currency(d.value)}
+                      </p>
                       <p className="mt-2 text-xs text-muted-foreground">{d.owner}</p>
                     </li>
                   ))}

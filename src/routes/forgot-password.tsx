@@ -10,7 +10,10 @@ export const Route = createFileRoute("/forgot-password")({
   head: () => ({
     meta: [
       { title: "Reset your password — BuildFlow AI" },
-      { name: "description", content: "Request a secure password reset link for your BuildFlow AI account." },
+      {
+        name: "description",
+        content: "Request a secure password reset link for your BuildFlow AI account.",
+      },
       { property: "og:title", content: "Reset your password — BuildFlow AI" },
       {
         property: "og:description",
@@ -43,7 +46,10 @@ function ForgotPasswordPage() {
           : "Enter the email tied to your workspace and we'll send a reset link."
       }
       footer={
-        <Link to="/login" className="font-medium text-foreground underline-offset-4 hover:underline">
+        <Link
+          to="/login"
+          className="font-medium text-foreground underline-offset-4 hover:underline"
+        >
           Back to log in
         </Link>
       }

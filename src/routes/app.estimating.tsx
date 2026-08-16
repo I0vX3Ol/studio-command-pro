@@ -10,7 +10,14 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { currency, estimateBreakdown, estimateRevisions, estimates } from "@/lib/mock-data";
 import { FileUp, Mail, Send, Sparkles, UploadCloud } from "lucide-react";
 
@@ -20,10 +27,14 @@ export const Route = createFileRoute("/app/estimating")({
       { title: "AI Estimating — BuildFlow AI" },
       {
         name: "description",
-        content: "Upload blueprints and generate labor, material, and risk-scored estimates with branded proposals.",
+        content:
+          "Upload blueprints and generate labor, material, and risk-scored estimates with branded proposals.",
       },
       { property: "og:title", content: "AI Estimating — BuildFlow AI" },
-      { property: "og:description", content: "Blueprint-native takeoffs, risk scoring, and branded proposals." },
+      {
+        property: "og:description",
+        content: "Blueprint-native takeoffs, risk scoring, and branded proposals.",
+      },
     ],
   }),
   component: EstimatingPage,
@@ -52,11 +63,18 @@ function EstimatingPage() {
         description="Turn a blueprint set into a defensible, risk-scored estimate and a branded proposal."
         actions={
           <>
-            <Button variant="outline" className="rounded-xl" onClick={() => toast.success("PDF exported")}>
+            <Button
+              variant="outline"
+              className="rounded-xl"
+              onClick={() => toast.success("PDF exported")}
+            >
               <FileUp className="size-4" />
               Export PDF
             </Button>
-            <Button className="rounded-xl" onClick={() => toast.success("Proposal sent to customer")}>
+            <Button
+              className="rounded-xl"
+              onClick={() => toast.success("Proposal sent to customer")}
+            >
               <Send className="size-4" />
               Send proposal
             </Button>
@@ -72,7 +90,11 @@ function EstimatingPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <Section title="Documents" description="Blueprints, PDFs, and site photos" className="lg:col-span-1">
+        <Section
+          title="Documents"
+          description="Blueprints, PDFs, and site photos"
+          className="lg:col-span-1"
+        >
           <button
             onClick={analyze}
             className="flex w-full flex-col items-center justify-center rounded-xl border border-dashed border-border py-12 transition-colors hover:bg-accent"
@@ -94,17 +116,26 @@ function EstimatingPage() {
             </div>
           ) : (
             <ul className="mt-5 space-y-2 text-sm">
-              {["A-101 → A-118 architectural.pdf", "S-201 structural.pdf", "Site photos (18)"].map((f) => (
-                <li key={f} className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
-                  <span className="truncate pr-3 text-muted-foreground">{f}</span>
-                  <StatusPill status="Complete" />
-                </li>
-              ))}
+              {["A-101 → A-118 architectural.pdf", "S-201 structural.pdf", "Site photos (18)"].map(
+                (f) => (
+                  <li
+                    key={f}
+                    className="flex items-center justify-between rounded-lg border border-border px-3 py-2"
+                  >
+                    <span className="truncate pr-3 text-muted-foreground">{f}</span>
+                    <StatusPill status="Complete" />
+                  </li>
+                ),
+              )}
             </ul>
           )}
         </Section>
 
-        <Section title="Cost breakdown" description="AI-generated labor and material takeoff" className="lg:col-span-2">
+        <Section
+          title="Cost breakdown"
+          description="AI-generated labor and material takeoff"
+          className="lg:col-span-2"
+        >
           <div className="h-56 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={estimateBreakdown} margin={{ left: -8, right: 8, top: 8 }}>
@@ -112,7 +143,12 @@ function EstimatingPage() {
                 <XAxis dataKey="category" {...axisProps} />
                 <YAxis {...axisProps} tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
                 <ChartTooltip />
-                <Bar dataKey="amount" fill="var(--color-chart-1)" radius={[8, 8, 0, 0]} maxBarSize={56} />
+                <Bar
+                  dataKey="amount"
+                  fill="var(--color-chart-1)"
+                  radius={[8, 8, 0, 0]}
+                  maxBarSize={56}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -151,7 +187,14 @@ function EstimatingPage() {
                 <Label htmlFor="markup">Markup</Label>
                 <span className="num text-sm">{pct}%</span>
               </div>
-              <Slider id="markup" value={markup} onValueChange={setMarkup} min={5} max={40} step={1} />
+              <Slider
+                id="markup"
+                value={markup}
+                onValueChange={setMarkup}
+                min={5}
+                max={40}
+                step={1}
+              />
             </div>
             <div className="rounded-xl border border-border bg-muted/40 p-4">
               <div className="flex items-center justify-between text-sm">
@@ -189,8 +232,9 @@ function EstimatingPage() {
               AI recommendation
             </p>
             <p className="mt-2 text-sm leading-relaxed">
-              Add a 4% steel escalation allowance and clarify site access on sheet A-104 before issuing. That
-              moves the risk score from Medium to Low and protects roughly $34,000 of margin.
+              Add a 4% steel escalation allowance and clarify site access on sheet A-104 before
+              issuing. That moves the risk score from Medium to Low and protects roughly $34,000 of
+              margin.
             </p>
           </div>
         </Section>
@@ -214,7 +258,12 @@ function EstimatingPage() {
       <Section
         title="All estimates"
         actions={
-          <Button variant="outline" size="sm" className="rounded-lg" onClick={() => toast.success("Emailed to customer")}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-lg"
+            onClick={() => toast.success("Emailed to customer")}
+          >
             <Mail className="size-4" />
             Email customer
           </Button>
@@ -241,8 +290,12 @@ function EstimatingPage() {
                 <TableCell className="text-muted-foreground">{e.customer}</TableCell>
                 <TableCell className="num text-right">{currency(e.total)}</TableCell>
                 <TableCell className="num text-right">{e.margin}%</TableCell>
-                <TableCell><StatusPill status={e.risk} /></TableCell>
-                <TableCell><StatusPill status={e.status} /></TableCell>
+                <TableCell>
+                  <StatusPill status={e.risk} />
+                </TableCell>
+                <TableCell>
+                  <StatusPill status={e.status} />
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

@@ -6,7 +6,14 @@ import { axisProps, ChartTooltip } from "@/components/shell/chart-bits";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { employees, timeOff } from "@/lib/mock-data";
 import { UserPlus } from "lucide-react";
 
@@ -16,10 +23,14 @@ export const Route = createFileRoute("/app/team")({
       { title: "Team — BuildFlow AI" },
       {
         name: "description",
-        content: "Employee directory, roles and permissions, time tracking, certifications, and performance.",
+        content:
+          "Employee directory, roles and permissions, time tracking, certifications, and performance.",
       },
       { property: "og:title", content: "Team — BuildFlow AI" },
-      { property: "og:description", content: "Directory, time tracking, certifications, and crew performance." },
+      {
+        property: "og:description",
+        content: "Directory, time tracking, certifications, and crew performance.",
+      },
     ],
   }),
   component: TeamPage,
@@ -75,7 +86,10 @@ function TeamPage() {
                   <div className="flex items-center gap-3">
                     <Avatar className="size-8">
                       <AvatarFallback className="text-[10px]">
-                        {e.name.split(" ").map((n) => n[0]).join("")}
+                        {e.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
                       </AvatarFallback>
                     </Avatar>
                     <span className="font-medium">{e.name}</span>
@@ -87,7 +101,9 @@ function TeamPage() {
                 <TableCell>
                   <div className="flex flex-wrap gap-1.5">
                     {e.certs.map((c) => (
-                      <Badge key={c} variant="secondary" className="rounded-full text-[10px]">{c}</Badge>
+                      <Badge key={c} variant="secondary" className="rounded-full text-[10px]">
+                        {c}
+                      </Badge>
                     ))}
                   </div>
                 </TableCell>
@@ -110,7 +126,12 @@ function TeamPage() {
                 <XAxis dataKey="crew" {...axisProps} />
                 <YAxis {...axisProps} />
                 <ChartTooltip />
-                <Bar dataKey="hours" fill="var(--color-chart-1)" radius={[8, 8, 0, 0]} maxBarSize={48} />
+                <Bar
+                  dataKey="hours"
+                  fill="var(--color-chart-1)"
+                  radius={[8, 8, 0, 0]}
+                  maxBarSize={48}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -122,7 +143,9 @@ function TeamPage() {
               <li key={t.name + t.range} className="flex items-center justify-between px-6 py-4">
                 <div>
                   <p className="text-sm font-medium">{t.name}</p>
-                  <p className="text-xs text-muted-foreground">{t.type} · {t.range}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t.type} · {t.range}
+                  </p>
                 </div>
                 <StatusPill status={t.status} />
               </li>
@@ -145,7 +168,12 @@ function TeamPage() {
                   <p className="text-sm font-medium">{role}</p>
                   <p className="text-xs text-muted-foreground">{desc}</p>
                 </div>
-                <Button variant="ghost" size="sm" className="rounded-lg" onClick={() => toast.success("Permissions opened")}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-lg"
+                  onClick={() => toast.success("Permissions opened")}
+                >
                   Edit
                 </Button>
               </li>
@@ -159,7 +187,11 @@ function TeamPage() {
             <p className="mt-1 text-sm text-muted-foreground">
               Approved time entries will flow straight into your payroll run.
             </p>
-            <Button variant="outline" className="mt-4 rounded-xl" onClick={() => toast.success("Provider list opened")}>
+            <Button
+              variant="outline"
+              className="mt-4 rounded-xl"
+              onClick={() => toast.success("Provider list opened")}
+            >
               Connect payroll
             </Button>
           </div>

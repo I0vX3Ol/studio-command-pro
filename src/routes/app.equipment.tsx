@@ -3,7 +3,14 @@ import { toast } from "sonner";
 import { PageHeader, Section, StatCard, StatusPill } from "@/components/shell/primitives";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { equipment } from "@/lib/mock-data";
 import { MapPin, Plus, QrCode } from "lucide-react";
 
@@ -13,10 +20,14 @@ export const Route = createFileRoute("/app/equipment")({
       { title: "Equipment — BuildFlow AI" },
       {
         name: "description",
-        content: "Fleet inventory, utilization, maintenance schedules, fuel tracking, and inspection reminders.",
+        content:
+          "Fleet inventory, utilization, maintenance schedules, fuel tracking, and inspection reminders.",
       },
       { property: "og:title", content: "Equipment — BuildFlow AI" },
-      { property: "og:description", content: "Track utilization, maintenance, fuel, and rentals across the fleet." },
+      {
+        property: "og:description",
+        content: "Track utilization, maintenance, fuel, and rentals across the fleet.",
+      },
     ],
   }),
   component: EquipmentPage,
@@ -33,7 +44,11 @@ function EquipmentPage() {
         description="Fleet health, utilization, and everything due for service."
         actions={
           <>
-            <Button variant="outline" className="rounded-xl" onClick={() => toast.success("QR scanner ready")}>
+            <Button
+              variant="outline"
+              className="rounded-xl"
+              onClick={() => toast.success("QR scanner ready")}
+            >
               <QrCode className="size-4" />
               QR lookup
             </Button>
@@ -84,7 +99,9 @@ function EquipmentPage() {
                 <TableCell className="num text-right">{e.hours.toLocaleString()}</TableCell>
                 <TableCell className="num text-right">{e.fuel}</TableCell>
                 <TableCell className="text-muted-foreground">{e.service}</TableCell>
-                <TableCell><StatusPill status={e.status} /></TableCell>
+                <TableCell>
+                  <StatusPill status={e.status} />
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

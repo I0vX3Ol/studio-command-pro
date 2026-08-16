@@ -5,7 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   changeOrders,
   currency,
@@ -24,10 +31,14 @@ export const Route = createFileRoute("/app/projects")({
       { title: "Projects — BuildFlow AI" },
       {
         name: "description",
-        content: "Kanban, Gantt, daily logs, milestones, change orders, and punch lists for every active job.",
+        content:
+          "Kanban, Gantt, daily logs, milestones, change orders, and punch lists for every active job.",
       },
       { property: "og:title", content: "Projects — BuildFlow AI" },
-      { property: "og:description", content: "Boards, schedules, daily logs, and change orders in one workspace." },
+      {
+        property: "og:description",
+        content: "Boards, schedules, daily logs, and change orders in one workspace.",
+      },
     ],
   }),
   component: ProjectsPage,
@@ -83,7 +94,9 @@ function ProjectsPage() {
                   <span className="text-muted-foreground"> / {currency(p.budget)}</span>
                 </TableCell>
                 <TableCell className="text-muted-foreground">{p.due}</TableCell>
-                <TableCell><StatusPill status={p.health} /></TableCell>
+                <TableCell>
+                  <StatusPill status={p.health} />
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -92,10 +105,18 @@ function ProjectsPage() {
 
       <Tabs defaultValue="board" className="space-y-6">
         <TabsList className="rounded-xl">
-          <TabsTrigger value="board" className="rounded-lg">Board</TabsTrigger>
-          <TabsTrigger value="schedule" className="rounded-lg">Schedule</TabsTrigger>
-          <TabsTrigger value="logs" className="rounded-lg">Daily logs</TabsTrigger>
-          <TabsTrigger value="orders" className="rounded-lg">Change orders</TabsTrigger>
+          <TabsTrigger value="board" className="rounded-lg">
+            Board
+          </TabsTrigger>
+          <TabsTrigger value="schedule" className="rounded-lg">
+            Schedule
+          </TabsTrigger>
+          <TabsTrigger value="logs" className="rounded-lg">
+            Daily logs
+          </TabsTrigger>
+          <TabsTrigger value="orders" className="rounded-lg">
+            Change orders
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="board">
@@ -104,7 +125,9 @@ function ProjectsPage() {
               <div key={col.id} className="panel p-4">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-semibold">{col.title}</p>
-                  <Badge variant="secondary" className="rounded-full">{col.cards.length}</Badge>
+                  <Badge variant="secondary" className="rounded-full">
+                    {col.cards.length}
+                  </Badge>
                 </div>
                 <ul className="mt-4 space-y-3">
                   {col.cards.map((c) => (
@@ -115,7 +138,9 @@ function ProjectsPage() {
                       <p className="text-sm font-medium leading-snug">{c.title}</p>
                       <p className="mt-1.5 text-xs text-muted-foreground">{c.project}</p>
                       <div className="mt-3 flex items-center justify-between">
-                        <Badge variant="outline" className="rounded-full text-[10px]">{c.tag}</Badge>
+                        <Badge variant="outline" className="rounded-full text-[10px]">
+                          {c.tag}
+                        </Badge>
                         <span className="text-[10px] text-muted-foreground">{c.owner}</span>
                       </div>
                     </li>
@@ -131,7 +156,10 @@ function ProjectsPage() {
             <div className="min-w-[640px] space-y-2 overflow-x-auto">
               <div className="grid grid-cols-[180px_1fr] items-center">
                 <span />
-                <div className="grid" style={{ gridTemplateColumns: `repeat(${WEEKS}, minmax(0,1fr))` }}>
+                <div
+                  className="grid"
+                  style={{ gridTemplateColumns: `repeat(${WEEKS}, minmax(0,1fr))` }}
+                >
                   {Array.from({ length: WEEKS }).map((_, i) => (
                     <span key={i} className="text-center text-[10px] text-muted-foreground">
                       {i + 1}
@@ -142,7 +170,10 @@ function ProjectsPage() {
               {ganttTasks.map((t) => (
                 <div key={t.name} className="grid grid-cols-[180px_1fr] items-center gap-2">
                   <span className="truncate text-xs text-muted-foreground">{t.name}</span>
-                  <div className="grid gap-px" style={{ gridTemplateColumns: `repeat(${WEEKS}, minmax(0,1fr))` }}>
+                  <div
+                    className="grid gap-px"
+                    style={{ gridTemplateColumns: `repeat(${WEEKS}, minmax(0,1fr))` }}
+                  >
                     <div
                       className="h-6 rounded-md bg-primary/85"
                       style={{ gridColumn: `${t.start + 1} / span ${t.span}` }}
@@ -175,7 +206,9 @@ function ProjectsPage() {
                   <li key={p.item} className="flex items-center justify-between px-6 py-4">
                     <div>
                       <p className="text-sm font-medium">{p.item}</p>
-                      <p className="text-xs text-muted-foreground">{p.trade} · due {p.due}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {p.trade} · due {p.due}
+                      </p>
                     </div>
                     <StatusPill status={p.status} />
                   </li>
@@ -244,7 +277,9 @@ function ProjectsPage() {
                     <TableCell>{c.project}</TableCell>
                     <TableCell className="text-muted-foreground">{c.desc}</TableCell>
                     <TableCell className="num text-right">{currency(c.amount)}</TableCell>
-                    <TableCell><StatusPill status={c.status} /></TableCell>
+                    <TableCell>
+                      <StatusPill status={c.status} />
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

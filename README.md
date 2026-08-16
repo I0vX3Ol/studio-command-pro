@@ -35,7 +35,7 @@ Use the GitHub repository as the source of truth for the project. Any changes yo
 
 Do not replace the existing project with a new starter template.
 
-If this Lovable account cannot directly connect to or access I0vX3Ol/buildflow-ai-dashboard, tell me exactly what GitHub permission or connection is required rather than creating a new project.        You are an award-winning team of product designers from Linear, Stripe, Notion, Vercel, Apple, and Airbnb.
+If this Lovable account cannot directly connect to or access I0vX3Ol/buildflow-ai-dashboard, tell me exactly what GitHub permission or connection is required rather than creating a new project. You are an award-winning team of product designers from Linear, Stripe, Notion, Vercel, Apple, and Airbnb.
 
 Design and build a premium SaaS web application called BuildFlow AI.
 
@@ -417,17 +417,7 @@ Generate all pages, components, routing, mock data, navigation, responsive layou
 
 Today at 12:13 PM
 
-
-
-
-
 Build unsuccessful
-
-
-
-
-
-
 
 Lovable can fix this without using additional credits.
 
