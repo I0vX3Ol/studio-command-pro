@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { toast } from "sonner";
 import { PageHeader, Section, StatusPill } from "@/components/shell/primitives";
 import { Button } from "@/components/ui/button";
@@ -20,12 +21,14 @@ import {
   ganttTasks,
   kanbanColumns,
   milestones,
-  projects,
   punchList,
 } from "@/lib/mock-data";
+import type { Project } from "@/lib/mock-data";
+import { createProject, fetchProjects } from "@/lib/remote-data";
 import { Camera, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/app/projects")({
+  loader: () => fetchProjects(),
   head: () => ({
     meta: [
       { title: "Projects — BuildFlow AI" },
@@ -47,14 +50,29 @@ export const Route = createFileRoute("/app/projects")({
 const WEEKS = 15;
 
 function ProjectsPage() {
+  const initialProjects = Route.useLoaderData();
+  const [projects, setProjects] = useState<Project[]>(initialProjects);
+
+  const handleNewProject = async () => {
+    try {
+      const created = await createProject({ name: "New project", status: "Planning" });
+      setProjects((prev) => [created, ...prev]);
+      toast.success("Project created — set customer, budget, and dates from its record.");
+    } catch (err) {
+      toast.error("Couldn't create project", {
+        description: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
+  };
+
   return (
     <>
       <PageHeader
         eyebrow="Operations"
         title="Projects"
-        description="Seventeen active jobs. Two need attention this week."
+        description={`${projects.length} active job${projects.length === 1 ? "" : "s"}.`}
         actions={
-          <Button className="rounded-xl" onClick={() => toast.success("New project created")}>
+          <Button className="rounded-xl" onClick={handleNewProject}>
             <Plus className="size-4" />
             New project
           </Button>

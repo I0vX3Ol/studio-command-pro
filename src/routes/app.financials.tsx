@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 import { PageHeader, Section, StatCard, StatusPill } from "@/components/shell/primitives";
@@ -12,10 +13,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { cashFlow, currency, expenses, invoices, purchaseOrders } from "@/lib/mock-data";
+import { cashFlow, currency, expenses, purchaseOrders } from "@/lib/mock-data";
+import type { Invoice } from "@/lib/remote-data";
+import { createInvoice, fetchInvoices } from "@/lib/remote-data";
 import { Download, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/app/financials")({
+  loader: () => fetchInvoices(),
   head: () => ({
     meta: [
       { title: "Financials — BuildFlow AI" },
@@ -32,10 +36,24 @@ export const Route = createFileRoute("/app/financials")({
 });
 
 function FinancialsPage() {
+  const initialInvoices = Route.useLoaderData();
+  const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
   const outstanding = invoices.filter((i) => i.status !== "Paid").reduce((s, i) => s + i.amount, 0);
   const overdue = invoices.filter((i) => i.status === "Overdue").reduce((s, i) => s + i.amount, 0);
   const collected = invoices.filter((i) => i.status === "Paid").reduce((s, i) => s + i.amount, 0);
   const monthExpenses = expenses.reduce((s, e) => s + e.amount, 0);
+
+  const handleNewInvoice = async () => {
+    try {
+      const created = await createInvoice({ amount: 0 });
+      setInvoices((prev) => [created, ...prev]);
+      toast.success("Draft invoice created — set customer and amount from its record.");
+    } catch (err) {
+      toast.error("Couldn't create invoice", {
+        description: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
+  };
 
   return (
     <>
@@ -53,10 +71,7 @@ function FinancialsPage() {
               <Download className="size-4" />
               Export
             </Button>
-            <Button
-              className="rounded-xl"
-              onClick={() => toast.success("New invoice draft opened")}
-            >
+            <Button className="rounded-xl" onClick={handleNewInvoice}>
               <Plus className="size-4" />
               New invoice
             </Button>

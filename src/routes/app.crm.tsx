@@ -16,7 +16,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { currency, customers, pipeline } from "@/lib/mock-data";
+import { currency, pipeline } from "@/lib/mock-data";
+import { createCustomer, fetchCustomers } from "@/lib/remote-data";
+import type { Customer } from "@/lib/mock-data";
 import {
   FileText,
   Image as ImageIcon,
@@ -30,6 +32,7 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/app/crm")({
+  loader: () => fetchCustomers(),
   head: () => ({
     meta: [
       { title: "CRM — BuildFlow AI" },
@@ -48,10 +51,25 @@ export const Route = createFileRoute("/app/crm")({
 });
 
 function CRMPage() {
-  const [selectedId, setSelectedId] = useState(customers[0]!.id);
+  const initialCustomers = Route.useLoaderData();
+  const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
+  const [selectedId, setSelectedId] = useState(initialCustomers[0]?.id ?? "");
   const [query, setQuery] = useState("");
-  const selected = customers.find((c) => c.id === selectedId)!;
+  const selected = customers.find((c) => c.id === selectedId) ?? customers[0]!;
   const filtered = customers.filter((c) => c.name.toLowerCase().includes(query.toLowerCase()));
+
+  const handleAddCustomer = async () => {
+    try {
+      const created = await createCustomer({ name: "New customer", status: "Prospect" });
+      setCustomers((prev) => [created, ...prev]);
+      setSelectedId(created.id);
+      toast.success("Customer added — edit details from their record.");
+    } catch (err) {
+      toast.error("Couldn't add customer", {
+        description: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
+  };
 
   return (
     <>
@@ -60,7 +78,7 @@ function CRMPage() {
         title="CRM"
         description="Every account, conversation, and open opportunity in one record."
         actions={
-          <Button className="rounded-xl" onClick={() => toast.success("New customer form opened")}>
+          <Button className="rounded-xl" onClick={handleAddCustomer}>
             <Plus className="size-4" />
             Add customer
           </Button>
