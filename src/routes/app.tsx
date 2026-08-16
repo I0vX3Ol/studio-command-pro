@@ -21,6 +21,9 @@ import { AIPanel, useAIPanel } from "@/components/shell/ai-panel";
 import { Bell, Menu, Moon, Search, Sparkles, Sun } from "lucide-react";
 
 export const Route = createFileRoute("/app")({
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex, nofollow" }],
+  }),
   component: AppLayout,
 });
 

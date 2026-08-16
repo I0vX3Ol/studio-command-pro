@@ -143,9 +143,12 @@ function Landing() {
       </main>
 
       <footer className="border-t border-border">
-        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-6 py-10 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-6 py-10 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>© 2026 BuildFlow AI</p>
-          <p>Built for contractors who ship on time.</p>
+          <nav className="flex items-center gap-4" aria-label="Legal">
+            <Link to="/legal/privacy" className="hover:text-foreground">Privacy</Link>
+            <Link to="/legal/terms" className="hover:text-foreground">Terms</Link>
+          </nav>
         </div>
       </footer>
     </div>
