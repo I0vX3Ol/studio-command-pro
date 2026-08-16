@@ -16,18 +16,16 @@ import { PageHeader, Section, StatCard } from "@/components/shell/primitives";
 import { axisProps, ChartTooltip } from "@/components/shell/chart-bits";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import {
-  analytics,
-  completionSeries,
-  currency,
-  forecastSeries,
-  marginSeries,
-  projects,
-  revenueSeries,
-} from "@/lib/mock-data";
-import { Download, Star } from "lucide-react";
+import { currency } from "@/lib/format";
+import type { Dashboard, Project } from "@/lib/remote-data";
+import { buildForecast, fetchDashboard, fetchProjects } from "@/lib/remote-data";
+import { Download } from "lucide-react";
 
 export const Route = createFileRoute("/app/analytics")({
+  loader: async () => {
+    const [dashboard, projects] = await Promise.all([fetchDashboard(), fetchProjects()]);
+    return { dashboard, projects };
+  },
   head: () => ({
     meta: [
       { title: "Analytics — BuildFlow AI" },
@@ -47,6 +45,21 @@ export const Route = createFileRoute("/app/analytics")({
 });
 
 function AnalyticsPage() {
+  const { dashboard, projects } = Route.useLoaderData() as {
+    dashboard: Dashboard;
+    projects: Project[];
+  };
+  const { analytics, months, weeks } = dashboard;
+  const latestMargin = months.at(-1)?.margin ?? 0;
+  const revenueSeries = months.map((m) => ({
+    month: m.month,
+    revenue: m.collected,
+    forecast: m.invoiced,
+  }));
+  const marginSeries = months.map((m) => ({ month: m.month, margin: m.margin }));
+  const completionSeries = weeks;
+  const forecastSeries = buildForecast(dashboard);
+
   return (
     <>
       <PageHeader
@@ -57,7 +70,7 @@ function AnalyticsPage() {
           <Button
             variant="outline"
             className="rounded-xl"
-            onClick={() => toast.success("Analytics export queued")}
+            onClick={() => toast.info("Analytics export is not enabled yet.")}
           >
             <Download className="size-4" />
             Export report
@@ -68,33 +81,21 @@ function AnalyticsPage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatCard
           label="Win rate"
-          value={`${analytics.winRate}%`}
-          delta={2.9}
-          hint="Trailing 90 days"
+          value={analytics.winRate != null ? `${analytics.winRate}%` : "—"}
+          hint="Deals marked won or lost"
         />
+        <StatCard label="Avg. project value" value={currency(analytics.avgProjectValue)} />
         <StatCard
-          label="Avg. project value"
-          value={currency(analytics.avgProjectValue)}
-          delta={4.5}
+          label="Lead conversion"
+          value={analytics.leadConversion != null ? `${analytics.leadConversion}%` : "—"}
+          hint="Customers marked active"
         />
-        <StatCard label="Lead conversion" value={`${analytics.leadConversion}%`} delta={1.8} />
+        <StatCard label="Blended margin" value={`${latestMargin}%`} hint="Collected less spend" />
+        <StatCard label="Open pipeline" value={currency(analytics.openPipelineValue)} />
         <StatCard
-          label="Blended margin"
-          value={`${analytics.margin}%`}
-          delta={3.4}
-          hint="Up from 16.2%"
-        />
-        <StatCard
-          label="Crew productivity"
-          value={`${analytics.productivity}%`}
-          delta={1.2}
-          hint="Of planned output"
-        />
-        <StatCard
-          label="Client satisfaction"
-          value={`${analytics.satisfaction} / 5`}
-          delta={0.6}
-          icon={Star}
+          label="Backlog"
+          value={currency(analytics.backlogValue)}
+          hint="Budget still to spend"
         />
       </div>
 
@@ -102,7 +103,7 @@ function AnalyticsPage() {
         <Section
           className="lg:col-span-2"
           title="Revenue forecast"
-          description="Recognized revenue vs. AI-modeled forecast"
+          description="Collected vs. invoiced, trailing eight months"
         >
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -161,8 +162,8 @@ function AnalyticsPage() {
       <div className="grid gap-6 lg:grid-cols-3">
         <Section
           className="lg:col-span-2"
-          title="Next-quarter revenue forecast"
-          description="AI projection with low / base / high scenarios"
+          title="Next-quarter projection"
+          description="Trailing three-month average with a ±15% band — a projection, not a commitment"
         >
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -179,13 +180,13 @@ function AnalyticsPage() {
           </div>
         </Section>
 
-        <Section title="Project completion" description="Planned vs. actual, current quarter">
+        <Section title="Task delivery" description="Due vs. completed, trailing eight weeks">
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={completionSeries} margin={{ left: -20, right: 8, top: 8 }}>
                 <CartesianGrid stroke="var(--color-border)" vertical={false} />
                 <XAxis dataKey="week" {...axisProps} />
-                <YAxis {...axisProps} unit="%" />
+                <YAxis {...axisProps} allowDecimals={false} />
                 <ChartTooltip />
                 <Line
                   type="monotone"

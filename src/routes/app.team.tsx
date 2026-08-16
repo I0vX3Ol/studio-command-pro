@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { PageHeader, Section, StatCard, StatusPill } from "@/components/shell/primitives";
@@ -14,10 +14,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { employees, timeOff } from "@/lib/mock-data";
+import { initials } from "@/lib/format";
+import type { Employee, TimeOffEntry } from "@/lib/remote-data";
+import { createEmployee, fetchEmployees, fetchTimeOff } from "@/lib/remote-data";
 import { UserPlus } from "lucide-react";
 
 export const Route = createFileRoute("/app/team")({
+  loader: async () => {
+    const [employees, timeOff] = await Promise.all([fetchEmployees(), fetchTimeOff()]);
+    return { employees, timeOff };
+  },
   head: () => ({
     meta: [
       { title: "Team — BuildFlow AI" },
@@ -36,15 +42,37 @@ export const Route = createFileRoute("/app/team")({
   component: TeamPage,
 });
 
-const hoursSeries = [
-  { crew: "Concrete", hours: 412 },
-  { crew: "Healthcare", hours: 528 },
-  { crew: "Commercial", hours: 476 },
-  { crew: "Hospitality", hours: 288 },
-  { crew: "Precon", hours: 160 },
-];
-
 function TeamPage() {
+  const router = useRouter();
+  const { employees, timeOff } = Route.useLoaderData() as {
+    employees: Employee[];
+    timeOff: TimeOffEntry[];
+  };
+
+  const hoursSeries = Object.entries(
+    employees.reduce<Record<string, number>>((acc, e) => {
+      const crew = e.crew === "—" ? "Unassigned" : e.crew;
+      acc[crew] = (acc[crew] ?? 0) + e.hours;
+      return acc;
+    }, {}),
+  ).map(([crew, hours]) => ({ crew, hours }));
+
+  const totalHours = employees.reduce((sum, e) => sum + e.hours, 0);
+  const onSite = employees.filter((e) => e.status === "On site").length;
+  const certified = employees.filter((e) => e.certs.length > 0).length;
+
+  const handleInvite = async () => {
+    try {
+      await createEmployee({ name: "New team member" });
+      toast.success("Team member added — open their record to fill in the details.");
+      await router.invalidate();
+    } catch (err) {
+      toast.error("Couldn't add team member", {
+        description: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
+  };
+
   return (
     <>
       <PageHeader
@@ -52,7 +80,7 @@ function TeamPage() {
         title="Team"
         description="Who's on site, what they're certified for, and how the crews are performing."
         actions={
-          <Button className="rounded-xl" onClick={() => toast.success("Invitation sent")}>
+          <Button className="rounded-xl" onClick={handleInvite}>
             <UserPlus className="size-4" />
             Invite employee
           </Button>
@@ -60,10 +88,14 @@ function TeamPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Active employees" value="31" delta={4.1} />
-        <StatCard label="Hours this week" value="1,864" delta={2.6} />
-        <StatCard label="Certifications expiring" value="3" delta={0} hint="Next 60 days" />
-        <StatCard label="Productivity index" value="92" delta={1.8} />
+        <StatCard label="Team members" value={String(employees.length)} />
+        <StatCard label="Scheduled hours" value={totalHours.toLocaleString()} hint="Per week" />
+        <StatCard label="On site now" value={String(onSite)} />
+        <StatCard
+          label="Certified"
+          value={String(certified)}
+          hint={`of ${employees.length} tracked`}
+        />
       </div>
 
       <Section title="Directory" padded={false}>
@@ -80,17 +112,19 @@ function TeamPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
+            {employees.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
+                  No team members yet.
+                </TableCell>
+              </TableRow>
+            ) : null}
             {employees.map((e) => (
-              <TableRow key={e.name}>
+              <TableRow key={e.id}>
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar className="size-8">
-                      <AvatarFallback className="text-[10px]">
-                        {e.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </AvatarFallback>
+                      <AvatarFallback className="text-[10px]">{initials(e.name)}</AvatarFallback>
                     </Avatar>
                     <span className="font-medium">{e.name}</span>
                   </div>
@@ -107,7 +141,7 @@ function TeamPage() {
                     ))}
                   </div>
                 </TableCell>
-                <TableCell className="num text-right">{e.rating}</TableCell>
+                <TableCell className="num text-right">{e.rating ?? "—"}</TableCell>
                 <TableCell>
                   <StatusPill status={e.status === "PTO" ? "Pending" : "Active"} />
                 </TableCell>
@@ -139,8 +173,13 @@ function TeamPage() {
 
         <Section title="Time off requests" padded={false}>
           <ul className="divide-y divide-border">
+            {timeOff.length === 0 ? (
+              <li className="px-6 py-8 text-center text-sm text-muted-foreground">
+                No requests outstanding.
+              </li>
+            ) : null}
             {timeOff.map((t) => (
-              <li key={t.name + t.range} className="flex items-center justify-between px-6 py-4">
+              <li key={t.id} className="flex items-center justify-between px-6 py-4">
                 <div>
                   <p className="text-sm font-medium">{t.name}</p>
                   <p className="text-xs text-muted-foreground">

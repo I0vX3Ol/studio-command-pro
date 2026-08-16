@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { aiAnswer, aiSuggestions } from "@/lib/mock-data";
+import { answer, assistantSuggestions } from "@/lib/assistant";
 import { ArrowUp, Sparkles } from "lucide-react";
 
 type Message = { role: "user" | "ai"; text: string };
@@ -45,10 +45,15 @@ export function AIPanel({ open, setOpen }: { open: boolean; setOpen: (v: boolean
     setMessages((m) => [...m, { role: "user", text }]);
     setValue("");
     setThinking(true);
-    window.setTimeout(() => {
-      setMessages((m) => [...m, { role: "ai", text: aiAnswer(text) }]);
-      setThinking(false);
-    }, 850);
+    void answer(text)
+      .then((reply) => setMessages((m) => [...m, { role: "ai", text: reply }]))
+      .catch(() =>
+        setMessages((m) => [
+          ...m,
+          { role: "ai", text: "I couldn't reach your workspace data just now. Try again." },
+        ]),
+      )
+      .finally(() => setThinking(false));
   };
 
   return (
@@ -57,10 +62,10 @@ export function AIPanel({ open, setOpen }: { open: boolean; setOpen: (v: boolean
         <SheetHeader className="border-b border-border px-6 py-5">
           <SheetTitle className="flex items-center gap-2 text-base">
             <Sparkles className="size-4 text-signal" aria-hidden />
-            BuildFlow AI
+            Workspace assistant
           </SheetTitle>
           <SheetDescription>
-            Grounded in every project, estimate, invoice, and daily log in your workspace.
+            Answers are calculated live from your own projects, estimates, invoices and equipment.
           </SheetDescription>
         </SheetHeader>
 
@@ -72,7 +77,7 @@ export function AIPanel({ open, setOpen }: { open: boolean; setOpen: (v: boolean
                   Suggested
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {aiSuggestions.map((s) => (
+                  {assistantSuggestions.map((s) => (
                     <button
                       key={s}
                       onClick={() => send(s)}

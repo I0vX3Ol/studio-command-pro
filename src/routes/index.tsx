@@ -124,13 +124,13 @@ function Landing() {
 
           <dl className="mt-20 grid gap-10 border-t border-border pt-10 sm:grid-cols-4">
             {[
-              ["$4.2B", "Contract value managed"],
-              ["31%", "Faster estimate turnaround"],
-              ["19.6%", "Average blended margin"],
-              ["4.7/5", "Customer satisfaction"],
+              ["CRM", "Customers, deals, and account history"],
+              ["Projects", "Boards, schedules, logs, and change orders"],
+              ["Estimating", "Line-item costing with margin and risk"],
+              ["Financials", "Invoices, expenses, POs, and cash flow"],
             ].map(([v, l]) => (
               <div key={l}>
-                <dt className="num text-2xl font-semibold">{v}</dt>
+                <dt className="text-lg font-semibold">{v}</dt>
                 <dd className="mt-1 text-sm text-muted-foreground">{l}</dd>
               </div>
             ))}

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { PageHeader, Section, StatusPill } from "@/components/shell/primitives";
@@ -9,10 +9,30 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { apiKeys, currentUser, org } from "@/lib/mock-data";
+import { initials } from "@/lib/format";
+import type { ApiKey, Organization, Profile } from "@/lib/remote-data";
+import {
+  createApiKey,
+  fetchApiKeys,
+  fetchEmployees,
+  fetchOrganization,
+  fetchProfile,
+  revokeApiKey,
+  updateOrganization,
+  updateProfile,
+} from "@/lib/remote-data";
 import { Copy, KeyRound, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/app/settings")({
+  loader: async () => {
+    const [profile, org, apiKeys, employees] = await Promise.all([
+      fetchProfile(),
+      fetchOrganization(),
+      fetchApiKeys(),
+      fetchEmployees(),
+    ]);
+    return { profile, org, apiKeys, seatsUsed: employees.length };
+  },
   head: () => ({
     meta: [
       { title: "Settings — BuildFlow AI" },
@@ -70,21 +90,33 @@ function SettingsPage() {
 }
 
 function ProfileTab() {
-  const [name, setName] = useState(currentUser.name);
-  const [email, setEmail] = useState(currentUser.email);
-  const [role, setRole] = useState(currentUser.role);
+  const { profile } = Route.useLoaderData() as { profile: Profile | null };
+  const [name, setName] = useState(profile?.name ?? "");
+  const [email, setEmail] = useState(profile?.email ?? "");
+  const [role, setRole] = useState(profile?.title ?? "");
+
+  const save = async () => {
+    try {
+      await updateProfile({ full_name: name, title: role });
+      toast.success("Profile saved");
+    } catch (err) {
+      toast.error("Couldn't save profile", {
+        description: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
+  };
 
   return (
     <Section title="Profile" description="This information is visible to your teammates.">
       <div className="flex flex-col gap-6">
         <div className="flex items-center gap-4">
           <Avatar className="size-16">
-            <AvatarFallback className="text-lg">{currentUser.initials}</AvatarFallback>
+            <AvatarFallback className="text-lg">{initials(name)}</AvatarFallback>
           </Avatar>
           <Button
             variant="outline"
             className="rounded-xl"
-            onClick={() => toast.success("Photo upload opened")}
+            onClick={() => toast.info("Avatar uploads are not enabled yet.")}
           >
             Change photo
           </Button>
@@ -95,7 +127,7 @@ function ProfileTab() {
           <Field id="role" label="Role" value={role} onChange={setRole} />
         </div>
         <div className="flex justify-end">
-          <Button className="rounded-xl" onClick={() => toast.success("Profile saved")}>
+          <Button className="rounded-xl" onClick={() => void save()}>
             Save changes
           </Button>
         </div>
@@ -105,7 +137,24 @@ function ProfileTab() {
 }
 
 function OrganizationTab() {
-  const [orgName, setOrgName] = useState(org.name);
+  const { org, seatsUsed } = Route.useLoaderData() as {
+    org: Organization | null;
+    seatsUsed: number;
+  };
+  const [orgName, setOrgName] = useState(org?.name ?? "");
+  const seats = org?.seats ?? 0;
+  const seatPct = seats > 0 ? Math.min(100, Math.round((seatsUsed / seats) * 100)) : 0;
+
+  const saveOrg = async () => {
+    try {
+      await updateOrganization({ name: orgName });
+      toast.success("Organization saved");
+    } catch (err) {
+      toast.error("Couldn't save organisation", {
+        description: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
+  };
 
   return (
     <>
@@ -116,12 +165,12 @@ function OrganizationTab() {
             <Label>Plan</Label>
             <div className="flex h-9 items-center gap-2">
               <StatusPill status="Active" />
-              <span className="text-sm text-muted-foreground">{org.plan} plan</span>
+              <span className="text-sm text-muted-foreground">{org?.plan ?? "Starter"} plan</span>
             </div>
           </div>
         </div>
         <div className="mt-6 flex justify-end">
-          <Button className="rounded-xl" onClick={() => toast.success("Organization saved")}>
+          <Button className="rounded-xl" onClick={() => void saveOrg()}>
             Save changes
           </Button>
         </div>
@@ -130,16 +179,16 @@ function OrganizationTab() {
       <Section title="Seats" description="Team members using BuildFlow AI.">
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">
-            {org.seatsUsed} of {org.seats} seats used
+            {seatsUsed} of {seats} seats used
           </span>
-          <span className="num font-medium">{Math.round((org.seatsUsed / org.seats) * 100)}%</span>
+          <span className="num font-medium">{seatPct}%</span>
         </div>
-        <Progress value={(org.seatsUsed / org.seats) * 100} className="mt-3 h-1.5" />
+        <Progress value={seatPct} className="mt-3 h-1.5" />
         <div className="mt-5">
           <Button
             variant="outline"
             className="rounded-xl"
-            onClick={() => toast.success("Invite dialog opened")}
+            onClick={() => toast.info("Teammate invitations are not enabled yet.")}
           >
             <Plus className="size-4" />
             Invite teammate
@@ -151,105 +200,88 @@ function OrganizationTab() {
 }
 
 function BillingTab() {
+  const { org } = Route.useLoaderData() as { org: Organization | null };
   return (
     <>
-      <Section title="Current plan" description="Billed annually.">
+      <Section title="Current plan">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-sm text-muted-foreground">Scale</p>
-            <p className="num mt-1 text-3xl font-semibold">
-              $1,200<span className="text-base font-normal text-muted-foreground">/mo</span>
+            <p className="text-sm text-muted-foreground">{org?.plan ?? "Starter"}</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {org?.seats ?? 0} seat{(org?.seats ?? 0) === 1 ? "" : "s"} · no charges yet
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Renews Mar 04, 2027 · {org.seats} seats
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              className="rounded-xl"
-              onClick={() => toast.success("Plan comparison opened")}
-            >
-              Change plan
-            </Button>
-            <Button className="rounded-xl" onClick={() => toast.success("Billing portal opened")}>
-              Manage billing
-            </Button>
-          </div>
-        </div>
-      </Section>
-
-      <Section title="Payment method" padded={false}>
-        <div className="flex items-center justify-between px-6 py-5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-12 items-center justify-center rounded-md border border-border bg-muted text-xs font-semibold">
-              VISA
-            </div>
-            <div>
-              <p className="text-sm font-medium">Visa ending 4242</p>
-              <p className="text-xs text-muted-foreground">Expires 08 / 28</p>
-            </div>
           </div>
           <Button
-            variant="ghost"
-            size="sm"
-            className="rounded-lg"
-            onClick={() => toast.success("Update card opened")}
+            variant="outline"
+            className="rounded-xl"
+            onClick={() => toast.info("Paid plans are not enabled yet.")}
           >
-            Update
+            Compare plans
           </Button>
         </div>
       </Section>
 
-      <Section title="Invoices" padded={false}>
-        <ul className="divide-y divide-border">
-          {[
-            { date: "Aug 04, 2026", amount: "$1,200.00", status: "Paid" },
-            { date: "Jul 04, 2026", amount: "$1,200.00", status: "Paid" },
-            { date: "Jun 04, 2026", amount: "$1,200.00", status: "Paid" },
-          ].map(({ date, amount, status }) => (
-            <li key={date} className="flex items-center justify-between px-6 py-4">
-              <span className="text-sm">{date}</span>
-              <div className="flex items-center gap-4">
-                <span className="num text-sm text-muted-foreground">{amount}</span>
-                <StatusPill status={status} />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="rounded-lg"
-                  onClick={() => toast.success("Receipt downloaded")}
-                >
-                  Receipt
-                </Button>
-              </div>
-            </li>
-          ))}
-        </ul>
+      <Section title="Invoices">
+        <p className="py-6 text-center text-sm text-muted-foreground">
+          Billing is not switched on yet, so there is nothing to show here.
+        </p>
       </Section>
     </>
   );
 }
 
 function ApiKeysTab() {
+  const router = useRouter();
+  const { apiKeys } = Route.useLoaderData() as { apiKeys: ApiKey[] };
+
+  const create = async () => {
+    try {
+      const key = await createApiKey("New key");
+      await navigator.clipboard.writeText(key.secret).catch(() => undefined);
+      toast.success("Key created and copied to your clipboard", {
+        description: "This is the only time the full key is shown.",
+        duration: 10000,
+      });
+      await router.invalidate();
+    } catch (err) {
+      toast.error("Couldn't create key", {
+        description: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
+  };
+
+  const revoke = async (key: ApiKey) => {
+    try {
+      await revokeApiKey(key.id);
+      toast.success(`${key.name} revoked`);
+      await router.invalidate();
+    } catch (err) {
+      toast.error("Couldn't revoke key", {
+        description: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
+  };
+
   return (
     <Section
       title="API keys"
       description="Use these to authenticate requests to the BuildFlow API."
       padded={false}
       actions={
-        <Button
-          size="sm"
-          className="rounded-lg"
-          onClick={() => toast.success("New API key generated")}
-        >
+        <Button size="sm" className="rounded-lg" onClick={() => void create()}>
           <Plus className="size-4" />
           Create key
         </Button>
       }
     >
       <ul className="divide-y divide-border">
+        {apiKeys.length === 0 ? (
+          <li className="px-6 py-8 text-center text-sm text-muted-foreground">
+            No keys yet. The full key is shown once, at creation.
+          </li>
+        ) : null}
         {apiKeys.map((key) => (
-          <li key={key.name} className="flex items-center gap-4 px-6 py-4">
+          <li key={key.id} className="flex items-center gap-4 px-6 py-4">
             <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted">
               <KeyRound className="size-4 text-muted-foreground" aria-hidden />
             </div>
@@ -261,18 +293,9 @@ function ApiKeysTab() {
             </div>
             <Button
               variant="ghost"
-              size="icon"
-              className="rounded-lg"
-              aria-label={`Copy ${key.name} key`}
-              onClick={() => toast.success("Key copied to clipboard")}
-            >
-              <Copy className="size-4" />
-            </Button>
-            <Button
-              variant="ghost"
               size="sm"
               className="rounded-lg text-destructive hover:text-destructive"
-              onClick={() => toast.success(`${key.name} key revoked`)}
+              onClick={() => void revoke(key)}
             >
               Revoke
             </Button>

@@ -5,11 +5,13 @@ import { PageHeader, Section, StatCard } from "@/components/shell/primitives";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { integrations as seedIntegrations } from "@/lib/mock-data";
+import type { Integration } from "@/lib/remote-data";
+import { fetchIntegrations, setIntegrationStatus } from "@/lib/remote-data";
 import { Plug, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/app/integrations")({
+  loader: () => fetchIntegrations(),
   head: () => ({
     meta: [
       { title: "Integrations — BuildFlow AI" },
@@ -29,10 +31,11 @@ export const Route = createFileRoute("/app/integrations")({
 });
 
 function IntegrationsPage() {
-  const [items, setItems] = useState(seedIntegrations.map((i) => ({ ...i })));
+  const loaded = Route.useLoaderData() as Integration[];
+  const [items, setItems] = useState<Integration[]>(loaded);
   const [query, setQuery] = useState("");
 
-  const connectedCount = items.filter((i) => i.connected).length;
+  const requestedCount = items.filter((i) => i.status === "requested").length;
 
   const grouped = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -50,15 +53,22 @@ function IntegrationsPage() {
     return Array.from(map.entries());
   }, [items, query]);
 
-  function toggle(name: string) {
-    setItems((prev) =>
-      prev.map((i) => {
-        if (i.name !== name) return i;
-        const next = !i.connected;
-        toast.success(`${i.name} ${next ? "connected" : "disconnected"}`);
-        return { ...i, connected: next };
-      }),
-    );
+  async function toggle(item: Integration) {
+    const next = item.status === "requested" ? "available" : "requested";
+    setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, status: next } : i)));
+    try {
+      await setIntegrationStatus(item.id, next);
+      toast.success(
+        next === "requested"
+          ? `${item.name} queued — we'll email you when the connector is live.`
+          : `${item.name} removed from your setup queue.`,
+      );
+    } catch (err) {
+      setItems((prev) => prev.map((i) => (i.id === item.id ? item : i)));
+      toast.error("Couldn't save that change", {
+        description: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
   }
 
   return (
@@ -66,27 +76,23 @@ function IntegrationsPage() {
       <PageHeader
         eyebrow="Workspace"
         title="Integrations"
-        description="Connect the tools your team already uses. Data syncs automatically once connected."
+        description="Tell us which tools you want wired up. Connectors are being rolled out one at a time — flagging one here puts your workspace in the queue."
         actions={
-          <Button
-            variant="outline"
-            className="rounded-xl"
-            onClick={() => toast.success("Integration directory opened")}
-          >
+          <Button variant="outline" className="rounded-xl" onClick={() => setQuery("")}>
             <Plug className="size-4" />
-            Browse all
+            Show all
           </Button>
         }
       />
 
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard
-          label="Connected"
-          value={String(connectedCount)}
-          hint={`of ${items.length} available`}
+          label="Requested"
+          value={String(requestedCount)}
+          hint={`of ${items.length} in the catalogue`}
         />
         <StatCard label="Categories" value={String(new Set(items.map((i) => i.category)).size)} />
-        <StatCard label="Data synced today" value="12,480" hint="Records across apps" />
+        <StatCard label="Live connectors" value="0" hint="Rolling out soon" />
       </div>
 
       <div className="relative max-w-sm">
@@ -114,28 +120,25 @@ function IntegrationsPage() {
           <Section key={category} title={category} padded={false}>
             <ul className="divide-y divide-border">
               {list.map((i) => (
-                <li key={i.name} className="flex items-center gap-4 px-6 py-4">
+                <li key={i.id} className="flex items-center gap-4 px-6 py-4">
                   <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border bg-muted text-sm font-semibold">
                     {i.name.slice(0, 2)}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-medium">{i.name}</p>
-                      {i.connected ? (
-                        <Badge
-                          variant="outline"
-                          className="rounded-full border-success/30 bg-transparent text-success"
-                        >
-                          Connected
+                      {i.status === "requested" ? (
+                        <Badge variant="outline" className="rounded-full">
+                          Setup requested
                         </Badge>
                       ) : null}
                     </div>
                     <p className="truncate text-xs text-muted-foreground">{i.desc}</p>
                   </div>
                   <Switch
-                    checked={i.connected}
-                    onCheckedChange={() => toggle(i.name)}
-                    aria-label={`${i.connected ? "Disconnect" : "Connect"} ${i.name}`}
+                    checked={i.status === "requested"}
+                    onCheckedChange={() => void toggle(i)}
+                    aria-label={`${i.status === "requested" ? "Remove" : "Request"} ${i.name} setup`}
                   />
                 </li>
               ))}

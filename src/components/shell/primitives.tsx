@@ -75,9 +75,9 @@ export function StatCard({
 }: {
   label: string;
   value: string;
-  delta?: number;
-  hint?: string;
-  icon?: LucideIcon;
+  delta?: number | undefined;
+  hint?: string | undefined;
+  icon?: LucideIcon | undefined;
 }) {
   const up = (delta ?? 0) >= 0;
   return (

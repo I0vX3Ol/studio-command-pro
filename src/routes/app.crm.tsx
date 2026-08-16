@@ -16,9 +16,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { currency, pipeline } from "@/lib/mock-data";
-import { createCustomer, fetchCustomers } from "@/lib/remote-data";
-import type { Customer } from "@/lib/mock-data";
+import { currency } from "@/lib/format";
+import { createCustomer, fetchCustomers, fetchPipeline } from "@/lib/remote-data";
+import type { Customer, PipelineStage } from "@/lib/remote-data";
 import {
   FileText,
   Image as ImageIcon,
@@ -32,7 +32,10 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/app/crm")({
-  loader: () => fetchCustomers(),
+  loader: async () => ({
+    customers: await fetchCustomers(),
+    pipeline: await fetchPipeline(),
+  }),
   head: () => ({
     meta: [
       { title: "CRM — BuildFlow AI" },
@@ -51,7 +54,10 @@ export const Route = createFileRoute("/app/crm")({
 });
 
 function CRMPage() {
-  const initialCustomers = Route.useLoaderData();
+  const { customers: initialCustomers, pipeline } = Route.useLoaderData() as {
+    customers: Customer[];
+    pipeline: PipelineStage[];
+  };
   const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
   const [selectedId, setSelectedId] = useState(initialCustomers[0]?.id ?? "");
   const [query, setQuery] = useState("");

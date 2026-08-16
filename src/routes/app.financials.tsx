@@ -13,13 +13,27 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { cashFlow, currency, expenses, purchaseOrders } from "@/lib/mock-data";
-import type { Invoice } from "@/lib/remote-data";
-import { createInvoice, fetchInvoices } from "@/lib/remote-data";
+import { currency, delta } from "@/lib/format";
+import type { Dashboard, Expense, Invoice, PurchaseOrder } from "@/lib/remote-data";
+import {
+  createInvoice,
+  fetchDashboard,
+  fetchExpenses,
+  fetchInvoices,
+  fetchPurchaseOrders,
+} from "@/lib/remote-data";
 import { Download, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/app/financials")({
-  loader: () => fetchInvoices(),
+  loader: async () => {
+    const [invoices, expenses, purchaseOrders, dashboard] = await Promise.all([
+      fetchInvoices(),
+      fetchExpenses(),
+      fetchPurchaseOrders(),
+      fetchDashboard(),
+    ]);
+    return { invoices, expenses, purchaseOrders, dashboard };
+  },
   head: () => ({
     meta: [
       { title: "Financials — BuildFlow AI" },
@@ -36,12 +50,26 @@ export const Route = createFileRoute("/app/financials")({
 });
 
 function FinancialsPage() {
-  const initialInvoices = Route.useLoaderData();
-  const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
+  const data = Route.useLoaderData() as {
+    invoices: Invoice[];
+    expenses: Expense[];
+    purchaseOrders: PurchaseOrder[];
+    dashboard: Dashboard;
+  };
+  const [invoices, setInvoices] = useState<Invoice[]>(data.invoices);
+  const { expenses, purchaseOrders, dashboard } = data;
   const outstanding = invoices.filter((i) => i.status !== "Paid").reduce((s, i) => s + i.amount, 0);
+  const outstandingCount = invoices.filter((i) => i.status !== "Paid").length;
   const overdue = invoices.filter((i) => i.status === "Overdue").reduce((s, i) => s + i.amount, 0);
-  const collected = invoices.filter((i) => i.status === "Paid").reduce((s, i) => s + i.amount, 0);
-  const monthExpenses = expenses.reduce((s, e) => s + e.amount, 0);
+  const collected = dashboard.kpis.revenueThisMonth;
+  const thisMonth = dashboard.months.at(-1);
+  const lastMonth = dashboard.months.at(-2);
+  const monthExpenses = thisMonth?.spent ?? 0;
+  const cashFlow = dashboard.months.map((m) => ({
+    month: m.month,
+    inflow: m.collected,
+    outflow: m.spent,
+  }));
 
   const handleNewInvoice = async () => {
     try {
@@ -83,15 +111,30 @@ function FinancialsPage() {
         <StatCard
           label="Outstanding AR"
           value={currency(outstanding)}
-          delta={-3.1}
-          hint="Across 3 invoices"
+          hint={`Across ${outstandingCount} invoice${outstandingCount === 1 ? "" : "s"}`}
         />
-        <StatCard label="Overdue" value={currency(overdue)} delta={-4.2} hint="Needs escalation" />
-        <StatCard label="Collected (MTD)" value={currency(collected)} delta={9.8} />
-        <StatCard label="Expenses (MTD)" value={currency(monthExpenses)} delta={2.4} />
+        <StatCard
+          label="Overdue"
+          value={currency(overdue)}
+          hint={
+            dashboard.kpis.overdueCount > 0
+              ? `${dashboard.kpis.overdueCount} needing escalation`
+              : "Nothing past due"
+          }
+        />
+        <StatCard
+          label="Collected (MTD)"
+          value={currency(collected)}
+          delta={delta(collected, dashboard.kpis.revenueLastMonth)}
+        />
+        <StatCard
+          label="Expenses (MTD)"
+          value={currency(monthExpenses)}
+          delta={delta(monthExpenses, lastMonth?.spent ?? 0)}
+        />
       </div>
 
-      <Section title="Cash flow" description="Inflow vs. outflow, trailing five months">
+      <Section title="Cash flow" description="Collected vs. spent, trailing eight months">
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={cashFlow} margin={{ left: -8, right: 8, top: 8 }}>
@@ -121,7 +164,7 @@ function FinancialsPage() {
           <TableBody>
             {invoices.map((inv) => (
               <TableRow key={inv.id}>
-                <TableCell className="num font-medium">{inv.id}</TableCell>
+                <TableCell className="num font-medium">{inv.invoiceId}</TableCell>
                 <TableCell className="text-muted-foreground">{inv.customer}</TableCell>
                 <TableCell className="text-muted-foreground">{inv.due}</TableCell>
                 <TableCell className="num text-right">{currency(inv.amount)}</TableCell>
@@ -136,7 +179,7 @@ function FinancialsPage() {
                       variant="ghost"
                       size="sm"
                       className="h-8 rounded-lg"
-                      onClick={() => toast.success(`Reminder sent for ${inv.id}`)}
+                      onClick={() => toast.success(`Reminder sent for ${inv.invoiceId}`)}
                     >
                       Send reminder
                     </Button>
@@ -161,7 +204,7 @@ function FinancialsPage() {
             </TableHeader>
             <TableBody>
               {expenses.map((e) => (
-                <TableRow key={`${e.vendor}-${e.date}`}>
+                <TableRow key={e.id}>
                   <TableCell className="font-medium">{e.vendor}</TableCell>
                   <TableCell className="text-muted-foreground">{e.category}</TableCell>
                   <TableCell className="text-muted-foreground">{e.project}</TableCell>
@@ -186,7 +229,7 @@ function FinancialsPage() {
             <TableBody>
               {purchaseOrders.map((po) => (
                 <TableRow key={po.id}>
-                  <TableCell className="num font-medium">{po.id}</TableCell>
+                  <TableCell className="num font-medium">{po.poNumber}</TableCell>
                   <TableCell className="text-muted-foreground">{po.vendor}</TableCell>
                   <TableCell className="num text-right">{currency(po.amount)}</TableCell>
                   <TableCell className="text-muted-foreground">{po.eta}</TableCell>

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
   Area,
@@ -15,20 +15,29 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { PageHeader, Section, StatCard, StatusPill } from "@/components/shell/primitives";
+import { currency, delta, initials } from "@/lib/format";
+import type { ActivityItem, Dashboard, Employee, EquipmentItem } from "@/lib/remote-data";
 import {
-  activity,
-  completionSeries,
-  currency,
-  deadlines,
-  employees,
-  equipment,
-  kpis,
-  revenueSeries,
-  weather,
-} from "@/lib/mock-data";
-import { CloudSun, Download, Plus, Sparkles } from "lucide-react";
+  fetchActivity,
+  fetchDashboard,
+  fetchEmployees,
+  fetchEquipment,
+  fetchProfile,
+} from "@/lib/remote-data";
+import type { Profile } from "@/lib/remote-data";
+import { Download, Plus, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/app/")({
+  loader: async () => {
+    const [dashboard, activity, equipment, employees, profile] = await Promise.all([
+      fetchDashboard(),
+      fetchActivity(),
+      fetchEquipment(),
+      fetchEmployees(),
+      fetchProfile(),
+    ]);
+    return { dashboard, activity, equipment, employees, profile };
+  },
   head: () => ({
     meta: [
       { title: "Dashboard — BuildFlow AI" },
@@ -70,23 +79,69 @@ function ChartTooltip() {
 }
 
 function Dashboard() {
+  const navigate = useNavigate();
+  const { dashboard, activity, equipment, employees, profile } = Route.useLoaderData() as {
+    dashboard: Dashboard;
+    activity: ActivityItem[];
+    equipment: EquipmentItem[];
+    employees: Employee[];
+    profile: Profile | null;
+  };
+  const { kpis: k, months, weeks, deadlines } = dashboard;
+
+  const revenueSeries = months.map((m) => ({
+    month: m.month,
+    revenue: m.collected,
+    forecast: m.invoiced,
+  }));
+  const completionSeries = weeks;
+
+  const kpis = [
+    {
+      label: "Collected this month",
+      value: currency(k.revenueThisMonth),
+      delta: delta(k.revenueThisMonth, k.revenueLastMonth),
+    },
+    { label: "Open estimates", value: String(k.openEstimates) },
+    { label: "Projects in progress", value: String(k.projectsInProgress) },
+    { label: "Projects completed", value: String(k.projectsCompleted) },
+    {
+      label: "Overdue receivables",
+      value: currency(k.overdueAmount),
+      hint: `${k.overdueCount} invoice${k.overdueCount === 1 ? "" : "s"}`,
+    },
+    { label: "Service due (30d)", value: String(k.scheduledService) },
+  ];
+
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const firstName = profile?.name?.split(" ")[0] ?? "there";
+
   return (
     <>
       <PageHeader
-        eyebrow="Thursday, August 13"
-        title="Good afternoon, Avery"
-        description="Northline is tracking 4.2% ahead of forecast this month. Two invoices need escalation today."
+        eyebrow={new Date().toLocaleDateString("en-US", {
+          weekday: "long",
+          month: "long",
+          day: "numeric",
+        })}
+        title={`${greeting}, ${firstName}`}
+        description={
+          k.overdueCount > 0
+            ? `${k.overdueCount} invoice${k.overdueCount === 1 ? "" : "s"} past due, worth ${currency(k.overdueAmount)}.`
+            : "Nothing past due. Here is where the business stands today."
+        }
         actions={
           <>
             <Button
               variant="outline"
               className="rounded-xl"
-              onClick={() => toast.success("Dashboard export queued")}
+              onClick={() => toast.info("Dashboard export is not enabled yet.")}
             >
               <Download className="size-4" />
               Export
             </Button>
-            <Button className="rounded-xl" onClick={() => toast.success("New project form opened")}>
+            <Button className="rounded-xl" onClick={() => void navigate({ to: "/app/projects" })}>
               <Plus className="size-4" />
               New project
             </Button>
@@ -95,22 +150,16 @@ function Dashboard() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {kpis.map((k) => (
-          <StatCard
-            key={k.label}
-            label={k.label}
-            value={k.format === "currency" ? currency(k.value) : String(k.value)}
-            delta={k.delta}
-            hint="vs. last month"
-          />
+        {kpis.map((kpi) => (
+          <StatCard key={kpi.label} {...kpi} />
         ))}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Section
           className="lg:col-span-2"
-          title="Revenue vs. forecast"
-          description="Trailing eight months, recognized revenue"
+          title="Collected vs. invoiced"
+          description="Collected vs. invoiced, trailing eight months"
         >
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -145,25 +194,18 @@ function Dashboard() {
           </div>
         </Section>
 
-        <Section title="Jobsite conditions" description={weather.location}>
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="num text-4xl font-semibold">{weather.temp}°</p>
-              <p className="mt-1 text-sm text-muted-foreground">{weather.condition}</p>
-              <p className="mt-3 text-xs text-muted-foreground">
-                Wind {weather.wind} mph · {weather.precip}% precip
-              </p>
-            </div>
-            <CloudSun className="size-9 text-signal" aria-hidden />
-          </div>
-          <ul className="mt-6 space-y-3 border-t border-border pt-5">
-            {weather.forecast.map((d) => (
-              <li key={d.day} className="flex items-center justify-between text-sm">
-                <span className="w-10 text-muted-foreground">{d.day}</span>
-                <span className="text-muted-foreground">{d.condition}</span>
-                <span className="num">
-                  {d.hi}° / {d.lo}°
-                </span>
+        <Section title="Today" description="Open work across the business">
+          <ul className="space-y-4">
+            {[
+              ["Open punch items", String(k.openPunchItems)],
+              ["Equipment tracked", String(k.activeEquipment)],
+              ["Average utilisation", `${k.avgUtilization}%`],
+              ["Team members", String(k.headcount)],
+              ["Customers", String(k.customers)],
+            ].map(([label, value]) => (
+              <li key={label} className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{label}</span>
+                <span className="num font-medium">{value}</span>
               </li>
             ))}
           </ul>
@@ -172,8 +214,8 @@ function Dashboard() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Section
-          title="Project completion"
-          description="Planned vs. actual, current quarter"
+          title="Task delivery"
+          description="Due vs. completed, trailing eight weeks"
           className="lg:col-span-2"
         >
           <div className="h-64 w-full">
@@ -181,7 +223,7 @@ function Dashboard() {
               <LineChart data={completionSeries} margin={{ left: -20, right: 8, top: 8 }}>
                 <CartesianGrid stroke="var(--color-border)" vertical={false} />
                 <XAxis dataKey="week" {...axis} />
-                <YAxis {...axis} unit="%" />
+                <YAxis {...axis} allowDecimals={false} />
                 <ChartTooltip />
                 <Line
                   type="monotone"
@@ -204,6 +246,11 @@ function Dashboard() {
 
         <Section title="Equipment utilization" description="Top assets this week">
           <ul className="space-y-5">
+            {equipment.length === 0 ? (
+              <li className="py-4 text-center text-sm text-muted-foreground">
+                No equipment tracked yet.
+              </li>
+            ) : null}
             {equipment.slice(0, 4).map((e) => (
               <li key={e.id}>
                 <div className="flex items-center justify-between text-sm">
@@ -225,21 +272,20 @@ function Dashboard() {
           padded={false}
         >
           <ul className="divide-y divide-border">
-            {activity.map((a, i) => (
-              <li key={i} className="flex items-start gap-3 px-6 py-4">
+            {activity.length === 0 ? (
+              <li className="px-6 py-8 text-center text-sm text-muted-foreground">
+                Nothing has happened in this workspace yet.
+              </li>
+            ) : null}
+            {activity.map((a) => (
+              <li key={a.id} className="flex items-start gap-3 px-6 py-4">
                 {a.kind === "ai" ? (
                   <div className="mt-0.5 flex size-7 items-center justify-center rounded-full bg-muted">
                     <Sparkles className="size-3.5 text-signal" aria-hidden />
                   </div>
                 ) : (
                   <Avatar className="mt-0.5 size-7">
-                    <AvatarFallback className="text-[10px]">
-                      {a.who
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                        .slice(0, 2)}
-                    </AvatarFallback>
+                    <AvatarFallback className="text-[10px]">{initials(a.who)}</AvatarFallback>
                   </Avatar>
                 )}
                 <p className="flex-1 text-sm leading-relaxed">
@@ -255,19 +301,31 @@ function Dashboard() {
         <div className="space-y-6">
           <Section title="Upcoming deadlines" padded={false}>
             <ul className="divide-y divide-border">
-              {deadlines.map((d) => (
-                <li key={d.title} className="flex items-center gap-3 px-6 py-3.5">
+              {deadlines.length === 0 ? (
+                <li className="px-6 py-8 text-center text-sm text-muted-foreground">
+                  Nothing scheduled.
+                </li>
+              ) : null}
+              {deadlines.slice(0, 6).map((d) => (
+                <li
+                  key={`${d.source}-${d.title}-${d.date}`}
+                  className="flex items-center gap-3 px-6 py-3.5"
+                >
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{d.title}</p>
-                    <p className="text-xs text-muted-foreground">{d.date}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(d.date).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                      })}{" "}
+                      · {d.owner}
+                    </p>
                   </div>
                   <StatusPill
                     status={
-                      d.urgency === "urgent"
-                        ? "Overdue"
-                        : d.urgency === "soon"
-                          ? "Pending"
-                          : "On track"
+                      new Date(d.date).getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000
+                        ? "Pending"
+                        : "On track"
                     }
                   />
                 </li>
@@ -277,15 +335,15 @@ function Dashboard() {
 
           <Section title="Crew status" padded={false}>
             <ul className="divide-y divide-border">
+              {employees.length === 0 ? (
+                <li className="px-6 py-8 text-center text-sm text-muted-foreground">
+                  No team members yet.
+                </li>
+              ) : null}
               {employees.slice(0, 5).map((e) => (
-                <li key={e.name} className="flex items-center gap-3 px-6 py-3">
+                <li key={e.id} className="flex items-center gap-3 px-6 py-3">
                   <Avatar className="size-7">
-                    <AvatarFallback className="text-[10px]">
-                      {e.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
+                    <AvatarFallback className="text-[10px]">{initials(e.name)}</AvatarFallback>
                   </Avatar>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{e.name}</p>

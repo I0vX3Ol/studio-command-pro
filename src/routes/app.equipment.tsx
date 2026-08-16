@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { PageHeader, Section, StatCard, StatusPill } from "@/components/shell/primitives";
 import { Button } from "@/components/ui/button";
@@ -11,10 +11,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { equipment } from "@/lib/mock-data";
-import { MapPin, Plus, QrCode } from "lucide-react";
+import { currency } from "@/lib/format";
+import type { Dashboard, EquipmentItem, ServiceLog } from "@/lib/remote-data";
+import {
+  createEquipment,
+  fetchDashboard,
+  fetchEquipment,
+  fetchServiceLogs,
+} from "@/lib/remote-data";
+import { MapPin, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/app/equipment")({
+  loader: async () => {
+    const [equipment, serviceLogs, dashboard] = await Promise.all([
+      fetchEquipment(),
+      fetchServiceLogs(),
+      fetchDashboard(),
+    ]);
+    return { equipment, serviceLogs, dashboard };
+  },
   head: () => ({
     meta: [
       { title: "Equipment — BuildFlow AI" },
@@ -34,7 +49,27 @@ export const Route = createFileRoute("/app/equipment")({
 });
 
 function EquipmentPage() {
-  const avgUtil = Math.round(equipment.reduce((s, e) => s + e.util, 0) / equipment.length);
+  const router = useRouter();
+  const { equipment, serviceLogs, dashboard } = Route.useLoaderData() as {
+    equipment: EquipmentItem[];
+    serviceLogs: ServiceLog[];
+    dashboard: Dashboard;
+  };
+  const upcomingService = serviceLogs.filter((l) => l.kind === "scheduled");
+  const serviceHistory = serviceLogs.filter((l) => l.kind !== "scheduled");
+  const rentals = equipment.filter((e) => e.isRental);
+
+  const handleAddAsset = async () => {
+    try {
+      await createEquipment({ name: "New asset" });
+      toast.success("Asset added — open its record to fill in the details.");
+      await router.invalidate();
+    } catch (err) {
+      toast.error("Couldn't add asset", {
+        description: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
+  };
 
   return (
     <>
@@ -44,15 +79,7 @@ function EquipmentPage() {
         description="Fleet health, utilization, and everything due for service."
         actions={
           <>
-            <Button
-              variant="outline"
-              className="rounded-xl"
-              onClick={() => toast.success("QR scanner ready")}
-            >
-              <QrCode className="size-4" />
-              QR lookup
-            </Button>
-            <Button className="rounded-xl" onClick={() => toast.success("Asset form opened")}>
+            <Button className="rounded-xl" onClick={handleAddAsset}>
               <Plus className="size-4" />
               Add asset
             </Button>
@@ -61,10 +88,14 @@ function EquipmentPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Assets tracked" value={String(equipment.length * 9)} delta={3.2} />
-        <StatCard label="Average utilization" value={`${avgUtil}%`} delta={5.4} />
-        <StatCard label="Due for service" value="4" delta={-1.1} hint="Next 30 days" />
-        <StatCard label="Fuel spend (MTD)" value="$7,420" delta={-2.8} />
+        <StatCard label="Assets tracked" value={String(equipment.length)} />
+        <StatCard label="Average utilization" value={`${dashboard.kpis.avgUtilization}%`} />
+        <StatCard
+          label="Due for service"
+          value={String(dashboard.kpis.scheduledService)}
+          hint="Next 30 days"
+        />
+        <StatCard label="Fuel spend (MTD)" value={currency(dashboard.kpis.fuelMonth)} />
       </div>
 
       <Section title="Fleet inventory" padded={false}>
@@ -86,7 +117,7 @@ function EquipmentPage() {
               <TableRow key={e.id}>
                 <TableCell>
                   <p className="font-medium">{e.name}</p>
-                  <p className="num text-xs text-muted-foreground">{e.id}</p>
+                  <p className="num text-xs text-muted-foreground">{e.assetTag}</p>
                 </TableCell>
                 <TableCell className="text-muted-foreground">{e.type}</TableCell>
                 <TableCell className="text-muted-foreground">{e.site}</TableCell>
@@ -111,37 +142,42 @@ function EquipmentPage() {
       <div className="grid gap-6 lg:grid-cols-3">
         <Section title="Maintenance schedule" padded={false}>
           <ul className="divide-y divide-border">
-            {[
-              ["JLG 1055 Telehandler", "Hydraulic service", "Aug 15"],
-              ["Genie S-65 Boom Lift", "Annual inspection", "Aug 24"],
-              ["CAT 320 Excavator", "500-hour service", "Sep 02"],
-              ["Multiquip Generator", "Oil & filter", "Sep 19"],
-            ].map(([name, task, date]) => (
-              <li key={name} className="flex items-center justify-between px-6 py-4">
-                <div>
-                  <p className="text-sm font-medium">{name}</p>
-                  <p className="text-xs text-muted-foreground">{task}</p>
-                </div>
-                <span className="text-xs text-muted-foreground">{date}</span>
+            {upcomingService.length === 0 ? (
+              <li className="px-6 py-8 text-center text-sm text-muted-foreground">
+                Nothing scheduled yet.
               </li>
-            ))}
+            ) : (
+              upcomingService.map((l) => (
+                <li key={l.id} className="flex items-center justify-between px-6 py-4">
+                  <div>
+                    <p className="text-sm font-medium">{l.equipment}</p>
+                    <p className="text-xs text-muted-foreground">{l.description}</p>
+                  </div>
+                  <span className="text-xs text-muted-foreground">{l.date}</span>
+                </li>
+              ))
+            )}
           </ul>
         </Section>
 
         <Section title="Service history" padded={false}>
           <ul className="divide-y divide-border">
-            {[
-              ["EQ-1042", "Track tension adjustment", "Jul 28 · $840"],
-              ["EQ-2210", "Boom sensor replacement", "Jul 14 · $2,150"],
-              ["EQ-3391", "Hydraulic hose repair", "Jun 30 · $620"],
-              ["EQ-4407", "Coolant flush", "Jun 12 · $310"],
-            ].map(([id, desc, meta]) => (
-              <li key={`${id}-${desc}`} className="px-6 py-4">
-                <p className="num text-xs text-muted-foreground">{id}</p>
-                <p className="text-sm font-medium">{desc}</p>
-                <p className="text-xs text-muted-foreground">{meta}</p>
+            {serviceHistory.length === 0 ? (
+              <li className="px-6 py-8 text-center text-sm text-muted-foreground">
+                No service recorded yet.
               </li>
-            ))}
+            ) : (
+              serviceHistory.map((l) => (
+                <li key={l.id} className="px-6 py-4">
+                  <p className="num text-xs text-muted-foreground">{l.equipment}</p>
+                  <p className="text-sm font-medium">{l.description}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {l.date}
+                    {l.cost != null ? ` · ${currency(l.cost)}` : ""}
+                  </p>
+                </li>
+              ))
+            )}
           </ul>
         </Section>
 
@@ -161,15 +197,21 @@ function EquipmentPage() {
 
           <Section title="Rental tracking" padded={false}>
             <ul className="divide-y divide-border">
-              {[
-                ["Skyjack SJ3219 Scissor", "Returns Aug 22 · $1,140/mo"],
-                ["Wacker Neuson Plate", "Returns Sep 04 · $380/mo"],
-              ].map(([name, meta]) => (
-                <li key={name} className="px-6 py-4">
-                  <p className="text-sm font-medium">{name}</p>
-                  <p className="text-xs text-muted-foreground">{meta}</p>
+              {rentals.length === 0 ? (
+                <li className="px-6 py-8 text-center text-sm text-muted-foreground">
+                  No rentals on hire.
                 </li>
-              ))}
+              ) : (
+                rentals.map((e) => (
+                  <li key={e.id} className="px-6 py-4">
+                    <p className="text-sm font-medium">{e.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Returns {e.rentalReturn}
+                      {e.rentalRate != null ? ` · ${currency(e.rentalRate)}/mo` : ""}
+                    </p>
+                  </li>
+                ))
+              )}
             </ul>
           </Section>
         </div>

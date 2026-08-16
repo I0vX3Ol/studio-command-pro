@@ -4,7 +4,9 @@ import { toast } from "sonner";
 import { navGroups } from "@/lib/nav";
 import { RequireAuth } from "@/lib/require-auth";
 import { useAuth } from "@/lib/auth";
-import { activity, currentUser, org } from "@/lib/mock-data";
+import { initials } from "@/lib/format";
+import type { ActivityItem, Organization, Profile } from "@/lib/remote-data";
+import { fetchActivity, fetchOrganization, fetchProfile } from "@/lib/remote-data";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -23,6 +25,14 @@ import { AIPanel, useAIPanel } from "@/components/shell/ai-panel";
 import { Bell, Menu, Moon, Search, Sparkles, Sun } from "lucide-react";
 
 export const Route = createFileRoute("/app")({
+  loader: async () => {
+    const [org, profile, activity] = await Promise.all([
+      fetchOrganization(),
+      fetchProfile(),
+      fetchActivity(),
+    ]);
+    return { org, profile, activity };
+  },
   head: () => ({
     meta: [{ name: "robots", content: "noindex, nofollow" }],
   }),
@@ -66,6 +76,11 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 function AppLayout() {
+  const { org, profile, activity } = Route.useLoaderData() as {
+    org: Organization | null;
+    profile: Profile | null;
+    activity: ActivityItem[];
+  };
   const palette = useCommandPalette();
   const ai = useAIPanel();
   const { theme, toggle } = useTheme();
@@ -95,9 +110,9 @@ function AppLayout() {
         </div>
         <div className="border-t border-sidebar-border p-4">
           <div className="rounded-xl bg-sidebar-accent p-3">
-            <p className="text-xs font-medium">{org.name}</p>
+            <p className="text-xs font-medium">{org?.name ?? "Workspace"}</p>
             <p className="mt-1 text-[11px] text-muted-foreground">
-              {org.plan} plan · {org.seatsUsed}/{org.seats} seats
+              {org?.plan ?? "Starter"} plan · {org?.seats ?? 0} seats
             </p>
           </div>
         </div>
@@ -158,15 +173,20 @@ function AppLayout() {
                   <p className="text-sm font-semibold">Notifications</p>
                   <button
                     className="text-xs text-muted-foreground hover:text-foreground"
-                    onClick={() => toast.success("All notifications marked as read")}
+                    onClick={() => toast.success("Marked as read")}
                   >
                     Mark all read
                   </button>
                 </div>
                 <DropdownMenuSeparator className="my-0" />
                 <ul className="max-h-80 overflow-y-auto py-1">
-                  {activity.slice(0, 5).map((a, i) => (
-                    <li key={i}>
+                  {activity.length === 0 ? (
+                    <li className="px-3 py-6 text-center text-xs text-muted-foreground">
+                      Nothing new.
+                    </li>
+                  ) : null}
+                  {activity.slice(0, 5).map((a) => (
+                    <li key={a.id}>
                       <Link
                         to="/app"
                         className="flex flex-col gap-0.5 px-3 py-2.5 text-sm hover:bg-accent"
@@ -186,14 +206,16 @@ function AppLayout() {
               <DropdownMenuTrigger asChild>
                 <button aria-label="Account menu" className="ml-1 rounded-full">
                   <Avatar className="size-8">
-                    <AvatarFallback className="text-xs">{currentUser.initials}</AvatarFallback>
+                    <AvatarFallback className="text-xs">{initials(profile?.name)}</AvatarFallback>
                   </Avatar>
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>
-                  <p className="text-sm font-medium">{currentUser.name}</p>
-                  <p className="text-xs font-normal text-muted-foreground">{currentUser.email}</p>
+                  <p className="text-sm font-medium">{profile?.name ?? "Your account"}</p>
+                  <p className="text-xs font-normal text-muted-foreground">
+                    {profile?.email ?? ""}
+                  </p>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>

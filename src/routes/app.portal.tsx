@@ -1,13 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { toast } from "sonner";
 import { PageHeader, Section, StatCard, StatusPill } from "@/components/shell/primitives";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { currency, invoices, portalDocuments, projects } from "@/lib/mock-data";
+import { currency } from "@/lib/format";
+import type { Customer, DocumentRow, Invoice, Project } from "@/lib/remote-data";
+import { fetchCustomers, fetchDocuments, fetchInvoices, fetchProjects } from "@/lib/remote-data";
 import { Download, ExternalLink, FileText } from "lucide-react";
 
 export const Route = createFileRoute("/app/portal")({
+  loader: async () => {
+    const [customers, projects, invoices, documents] = await Promise.all([
+      fetchCustomers(),
+      fetchProjects(),
+      fetchInvoices(),
+      fetchDocuments(true),
+    ]);
+    return { customers, projects, invoices, documents };
+  },
   head: () => ({
     meta: [
       { title: "Client Portal — BuildFlow AI" },
@@ -27,8 +39,21 @@ export const Route = createFileRoute("/app/portal")({
 });
 
 function PortalPage() {
-  const clientProjects = projects.filter((p) => p.customer === "Meridian Health Systems");
-  const clientInvoices = invoices.filter((i) => i.customer === "Meridian Health Systems");
+  const { customers, projects, invoices, documents } = Route.useLoaderData() as {
+    customers: Customer[];
+    projects: Project[];
+    invoices: Invoice[];
+    documents: DocumentRow[];
+  };
+
+  const defaultClient =
+    customers.find((c) => projects.some((p) => p.customer === c.name))?.name ??
+    customers[0]?.name ??
+    "";
+  const [client, setClient] = useState(defaultClient);
+
+  const clientProjects = projects.filter((p) => p.customer === client);
+  const clientInvoices = invoices.filter((i) => i.customer === client);
   const openBalance = clientInvoices
     .filter((i) => i.status !== "Paid")
     .reduce((s, i) => s + i.amount, 0);
@@ -38,19 +63,32 @@ function PortalPage() {
       <PageHeader
         eyebrow="Workspace"
         title="Client Portal"
-        description="A preview of what Meridian Health Systems sees when they log in. Everything here is read-only for the client."
+        description={
+          client
+            ? `A preview of what ${client} sees when they log in. Everything here is read-only for the client.`
+            : "Add a customer to preview the client-facing portal."
+        }
         actions={
           <>
+            <select
+              aria-label="Preview portal as customer"
+              className="h-9 rounded-xl border border-border bg-background px-3 text-sm"
+              value={client}
+              onChange={(e) => setClient(e.target.value)}
+            >
+              {customers.map((c) => (
+                <option key={c.id} value={c.name}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
             <Button
               variant="outline"
               className="rounded-xl"
-              onClick={() => toast.success("Portal opened in a new tab")}
+              onClick={() => toast.info("Client-facing portal links are not enabled yet.")}
             >
               <ExternalLink className="size-4" />
               Open live portal
-            </Button>
-            <Button className="rounded-xl" onClick={() => toast.success("Client invitation sent")}>
-              Invite client
             </Button>
           </>
         }
@@ -63,7 +101,7 @@ function PortalPage() {
           hint="Visible to client"
         />
         <StatCard label="Open balance" value={currency(openBalance)} hint="Awaiting payment" />
-        <StatCard label="Documents shared" value={String(portalDocuments.length)} />
+        <StatCard label="Documents shared" value={String(documents.length)} />
       </div>
 
       <Section title="Project progress" description="Live status the client can follow">
@@ -93,8 +131,13 @@ function PortalPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <Section title="Shared documents" padded={false}>
           <ul className="divide-y divide-border">
-            {portalDocuments.map((doc) => (
-              <li key={doc.name} className="flex items-center gap-3 px-6 py-4">
+            {documents.length === 0 ? (
+              <li className="px-6 py-8 text-center text-sm text-muted-foreground">
+                Nothing shared with clients yet.
+              </li>
+            ) : null}
+            {documents.map((doc) => (
+              <li key={doc.id} className="flex items-center gap-3 px-6 py-4">
                 <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted">
                   <FileText className="size-4 text-muted-foreground" aria-hidden />
                 </div>
@@ -120,10 +163,15 @@ function PortalPage() {
 
         <Section title="Invoices" description="What the client can pay online" padded={false}>
           <ul className="divide-y divide-border">
+            {clientInvoices.length === 0 ? (
+              <li className="px-6 py-8 text-center text-sm text-muted-foreground">
+                No invoices for this client.
+              </li>
+            ) : null}
             {clientInvoices.map((inv) => (
               <li key={inv.id} className="flex items-center gap-3 px-6 py-4">
                 <div className="min-w-0 flex-1">
-                  <p className="num text-sm font-medium">{inv.id}</p>
+                  <p className="num text-sm font-medium">{inv.invoiceId}</p>
                   <p className="text-xs text-muted-foreground">Due {inv.due}</p>
                 </div>
                 <span className="num text-sm">{currency(inv.amount)}</span>
@@ -138,7 +186,7 @@ function PortalPage() {
                   <Button
                     size="sm"
                     className="h-8 rounded-lg"
-                    onClick={() => toast.success(`Payment link sent for ${inv.id}`)}
+                    onClick={() => toast.success(`Payment link sent for ${inv.invoiceId}`)}
                   >
                     Pay now
                   </Button>

@@ -14,21 +14,39 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { currency } from "@/lib/format";
 import {
-  changeOrders,
-  currency,
-  dailyLogs,
-  ganttTasks,
-  kanbanColumns,
-  milestones,
-  punchList,
-} from "@/lib/mock-data";
-import type { Project } from "@/lib/mock-data";
-import { createProject, fetchProjects } from "@/lib/remote-data";
+  buildGantt,
+  createProject,
+  fetchChangeOrders,
+  fetchDailyLogs,
+  fetchMilestones,
+  fetchProjects,
+  fetchPunchList,
+  fetchTaskBoard,
+} from "@/lib/remote-data";
+import type {
+  ChangeOrder,
+  DailyLog,
+  KanbanColumn,
+  Milestone,
+  Project,
+  PunchItem,
+} from "@/lib/remote-data";
 import { Camera, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/app/projects")({
-  loader: () => fetchProjects(),
+  loader: async () => {
+    const [projects, board, milestones, punchList, dailyLogs, changeOrders] = await Promise.all([
+      fetchProjects(),
+      fetchTaskBoard(),
+      fetchMilestones(),
+      fetchPunchList(),
+      fetchDailyLogs(),
+      fetchChangeOrders(),
+    ]);
+    return { projects, board, milestones, punchList, dailyLogs, changeOrders };
+  },
   head: () => ({
     meta: [
       { title: "Projects — BuildFlow AI" },
@@ -50,8 +68,17 @@ export const Route = createFileRoute("/app/projects")({
 const WEEKS = 15;
 
 function ProjectsPage() {
-  const initialProjects = Route.useLoaderData();
-  const [projects, setProjects] = useState<Project[]>(initialProjects);
+  const data = Route.useLoaderData() as {
+    projects: Project[];
+    board: KanbanColumn[];
+    milestones: Milestone[];
+    punchList: PunchItem[];
+    dailyLogs: DailyLog[];
+    changeOrders: ChangeOrder[];
+  };
+  const [projects, setProjects] = useState<Project[]>(data.projects);
+  const { board: kanbanColumns, milestones, punchList, dailyLogs, changeOrders } = data;
+  const ganttTasks = buildGantt(projects, WEEKS);
 
   const handleNewProject = async () => {
     try {
@@ -170,7 +197,7 @@ function ProjectsPage() {
         </TabsContent>
 
         <TabsContent value="schedule" className="space-y-6">
-          <Section title="Gantt — Meridian Wing C" description="15-week rolling window">
+          <Section title="Schedule" description="15-week rolling window across active projects">
             <div className="min-w-[640px] space-y-2 overflow-x-auto">
               <div className="grid grid-cols-[180px_1fr] items-center">
                 <span />
@@ -207,7 +234,7 @@ function ProjectsPage() {
             <Section title="Milestones" padded={false}>
               <ul className="divide-y divide-border">
                 {milestones.map((m) => (
-                  <li key={m.name} className="flex items-center justify-between px-6 py-4">
+                  <li key={m.id} className="flex items-center justify-between px-6 py-4">
                     <div>
                       <p className="text-sm font-medium">{m.name}</p>
                       <p className="text-xs text-muted-foreground">{m.date}</p>
@@ -221,7 +248,7 @@ function ProjectsPage() {
             <Section title="Punch list" padded={false}>
               <ul className="divide-y divide-border">
                 {punchList.map((p) => (
-                  <li key={p.item} className="flex items-center justify-between px-6 py-4">
+                  <li key={p.id} className="flex items-center justify-between px-6 py-4">
                     <div>
                       <p className="text-sm font-medium">{p.item}</p>
                       <p className="text-xs text-muted-foreground">
@@ -241,7 +268,7 @@ function ProjectsPage() {
             <Section title="Daily logs" className="lg:col-span-2" padded={false}>
               <ul className="divide-y divide-border">
                 {dailyLogs.map((l) => (
-                  <li key={l.date} className="px-6 py-5">
+                  <li key={l.id} className="px-6 py-5">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <p className="text-sm font-semibold">{l.date}</p>
                       <p className="text-xs text-muted-foreground">
@@ -291,7 +318,7 @@ function ProjectsPage() {
               <TableBody>
                 {changeOrders.map((c) => (
                   <TableRow key={c.id}>
-                    <TableCell className="num font-medium">{c.id}</TableCell>
+                    <TableCell className="num font-medium">{c.number}</TableCell>
                     <TableCell>{c.project}</TableCell>
                     <TableCell className="text-muted-foreground">{c.desc}</TableCell>
                     <TableCell className="num text-right">{currency(c.amount)}</TableCell>
