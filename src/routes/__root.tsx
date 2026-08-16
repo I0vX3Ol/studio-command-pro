@@ -99,7 +99,29 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
-    scripts: [{ children: themeInitScript }],
+    scripts: [
+      { children: themeInitScript },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "BuildFlow AI",
+          url: "https://buildflow.nexudel.com",
+          description:
+            "BuildFlow AI unifies CRM, AI estimating, project management, equipment, and financials in one premium construction operations platform.",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "BuildFlow AI",
+          url: "https://buildflow.nexudel.com",
+        }),
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
