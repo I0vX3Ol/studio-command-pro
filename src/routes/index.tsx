@@ -98,7 +98,7 @@ function Landing() {
         </div>
       </header>
 
-      <main>
+      <main id="main">
         <section className="mx-auto max-w-6xl px-6 pb-24 pt-24 sm:pt-32">
           <Badge variant="outline" className="rounded-full px-3 py-1 text-xs font-medium">
             Now with blueprint-native estimating
