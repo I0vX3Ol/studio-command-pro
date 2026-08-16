@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CheckCircle2, Loader2 } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/forgot-password")({
   head: () => ({
@@ -25,16 +26,17 @@ export const Route = createFileRoute("/forgot-password")({
 });
 
 function ForgotPasswordPage() {
+  const { resetPassword } = useAuth();
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [email, setEmail] = useState("");
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    window.setTimeout(() => {
-      setLoading(false);
-      setSent(true);
-    }, 700);
+    await resetPassword(email);
+    setLoading(false);
+    setSent(true);
   };
 
   return (
@@ -63,7 +65,14 @@ function ForgotPasswordPage() {
         <form onSubmit={submit} className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="email">Work email</Label>
-            <Input id="email" type="email" required className="h-11 rounded-xl" />
+            <Input
+              id="email"
+              type="email"
+              required
+              className="h-11 rounded-xl"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
           <Button type="submit" disabled={loading} className="h-11 w-full rounded-xl">
             {loading ? <Loader2 className="size-4 animate-spin" /> : null}

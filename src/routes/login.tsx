@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Loader2, Mail } from "lucide-react";
+import { useAuth } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -25,56 +26,42 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
+  const { signIn } = useAuth();
   const navigate = useNavigate();
-  const [step, setStep] = useState<"credentials" | "twofactor">("credentials");
   const [loading, setLoading] = useState(false);
-  const [code, setCode] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     setLoading(true);
-    window.setTimeout(() => {
-      setLoading(false);
-      setStep("twofactor");
-    }, 700);
+    const { error } = await signIn({ email, password });
+    setLoading(false);
+    if (error) {
+      setError(error);
+      return;
+    }
+    toast.success("Welcome back");
+    navigate({ to: "/app" });
   };
 
-  const verify = () => {
-    setLoading(true);
-    window.setTimeout(() => {
-      toast.success("Welcome back, Avery");
-      navigate({ to: "/app" });
-    }, 700);
+  const sendMagicLink = async () => {
+    if (!email) {
+      setError("Enter your email above first");
+      return;
+    }
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/app` },
+    });
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(`Magic link sent to ${email}`);
   };
-
-  if (step === "twofactor") {
-    return (
-      <AuthShell
-        title="Two-factor authentication"
-        description="Enter the 6-digit code from your authenticator app to finish signing in."
-      >
-        <div className="space-y-6">
-          <InputOTP maxLength={6} value={code} onChange={setCode}>
-            <InputOTPGroup>
-              {[0, 1, 2, 3, 4, 5].map((i) => (
-                <InputOTPSlot key={i} index={i} className="size-12 rounded-xl text-base" />
-              ))}
-            </InputOTPGroup>
-          </InputOTP>
-          <Button onClick={verify} disabled={loading} className="h-11 w-full rounded-xl">
-            {loading ? <Loader2 className="size-4 animate-spin" /> : null}
-            Verify and continue
-          </Button>
-          <button
-            onClick={() => setStep("credentials")}
-            className="text-sm text-muted-foreground underline-offset-4 hover:underline"
-          >
-            Use a different account
-          </button>
-        </div>
-      </AuthShell>
-    );
-  }
 
   return (
     <AuthShell
@@ -93,14 +80,23 @@ function LoginPage() {
       }
     >
       <form onSubmit={submit} className="space-y-5">
+        {error && (
+          <p
+            role="alert"
+            className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive"
+          >
+            {error}
+          </p>
+        )}
         <div className="space-y-2">
           <Label htmlFor="email">Work email</Label>
           <Input
             id="email"
             type="email"
             required
-            defaultValue="avery@northline.build"
             className="h-11 rounded-xl"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
         <div className="space-y-2">
@@ -117,8 +113,9 @@ function LoginPage() {
             id="password"
             type="password"
             required
-            defaultValue="password"
             className="h-11 rounded-xl"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
         </div>
         <Button type="submit" disabled={loading} className="h-11 w-full rounded-xl">
@@ -133,11 +130,7 @@ function LoginPage() {
         <Separator className="flex-1" />
       </div>
 
-      <Button
-        variant="outline"
-        className="h-11 w-full rounded-xl"
-        onClick={() => toast.success("Magic link sent to avery@northline.build")}
-      >
+      <Button variant="outline" className="h-11 w-full rounded-xl" onClick={sendMagicLink}>
         <Mail className="size-4" />
         Email me a magic link
       </Button>

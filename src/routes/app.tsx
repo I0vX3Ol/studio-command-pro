@@ -1,7 +1,9 @@
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { navGroups } from "@/lib/nav";
+import { RequireAuth } from "@/lib/require-auth";
+import { useAuth } from "@/lib/auth";
 import { activity, currentUser, org } from "@/lib/mock-data";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
@@ -24,7 +26,11 @@ export const Route = createFileRoute("/app")({
   head: () => ({
     meta: [{ name: "robots", content: "noindex, nofollow" }],
   }),
-  component: AppLayout,
+  component: () => (
+    <RequireAuth>
+      <AppLayout />
+    </RequireAuth>
+  ),
 });
 
 function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
@@ -65,6 +71,8 @@ function AppLayout() {
   const { theme, toggle } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
@@ -195,8 +203,13 @@ function AppLayout() {
                   <Link to="/app/settings">Billing</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/login">Sign out</Link>
+                <DropdownMenuItem
+                  onSelect={async () => {
+                    await signOut();
+                    navigate({ to: "/login" });
+                  }}
+                >
+                  Sign out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
