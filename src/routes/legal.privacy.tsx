@@ -50,8 +50,8 @@ function PrivacyPage() {
     <div className="mx-auto max-w-3xl px-6 py-16">
       <h1 className="text-3xl font-semibold sm:text-4xl">Privacy Policy</h1>
       <p className="mt-4 text-sm text-muted-foreground">
-        This summary describes our privacy practices in plain language. It is provided as a
-        starting template and should be reviewed by counsel before launch.
+        This summary describes our privacy practices in plain language. It is provided as a starting
+        template and should be reviewed by counsel before launch.
       </p>
       {sections.map((s) => (
         <section key={s.heading} className="mt-10">

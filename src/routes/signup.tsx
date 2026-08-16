@@ -13,12 +13,14 @@ export const Route = createFileRoute("/signup")({
       { title: "Create your workspace — BuildFlow AI" },
       {
         name: "description",
-        content: "Start a free BuildFlow AI trial and run estimating, projects, and finances in one place.",
+        content:
+          "Start a free BuildFlow AI trial and run estimating, projects, and finances in one place.",
       },
       { property: "og:title", content: "Create your workspace — BuildFlow AI" },
       {
         property: "og:description",
-        content: "Start a free BuildFlow AI trial and run estimating, projects, and finances in one place.",
+        content:
+          "Start a free BuildFlow AI trial and run estimating, projects, and finances in one place.",
       },
     ],
   }),
@@ -45,7 +47,10 @@ function SignupPage() {
       footer={
         <>
           Already have an account?{" "}
-          <Link to="/login" className="font-medium text-foreground underline-offset-4 hover:underline">
+          <Link
+            to="/login"
+            className="font-medium text-foreground underline-offset-4 hover:underline"
+          >
             Log in
           </Link>
         </>

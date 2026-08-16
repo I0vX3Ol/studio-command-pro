@@ -37,7 +37,7 @@ const sections = [
   },
   {
     heading: "Limitation of liability",
-    body: "The platform is provided \"as is\" without warranties of any kind, to the maximum extent permitted by law.",
+    body: 'The platform is provided "as is" without warranties of any kind, to the maximum extent permitted by law.',
   },
   {
     heading: "Contact",

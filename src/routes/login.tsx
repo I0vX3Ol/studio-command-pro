@@ -15,7 +15,10 @@ export const Route = createFileRoute("/login")({
       { title: "Log in — BuildFlow AI" },
       { name: "description", content: "Sign in to your BuildFlow AI construction workspace." },
       { property: "og:title", content: "Log in — BuildFlow AI" },
-      { property: "og:description", content: "Sign in to your BuildFlow AI construction workspace." },
+      {
+        property: "og:description",
+        content: "Sign in to your BuildFlow AI construction workspace.",
+      },
     ],
   }),
   component: LoginPage,
@@ -80,7 +83,10 @@ function LoginPage() {
       footer={
         <>
           New to BuildFlow?{" "}
-          <Link to="/signup" className="font-medium text-foreground underline-offset-4 hover:underline">
+          <Link
+            to="/signup"
+            className="font-medium text-foreground underline-offset-4 hover:underline"
+          >
             Create an account
           </Link>
         </>
@@ -107,7 +113,13 @@ function LoginPage() {
               Forgot password?
             </Link>
           </div>
-          <Input id="password" type="password" required defaultValue="password" className="h-11 rounded-xl" />
+          <Input
+            id="password"
+            type="password"
+            required
+            defaultValue="password"
+            className="h-11 rounded-xl"
+          />
         </div>
         <Button type="submit" disabled={loading} className="h-11 w-full rounded-xl">
           {loading ? <Loader2 className="size-4 animate-spin" /> : null}
