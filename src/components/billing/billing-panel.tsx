@@ -3,7 +3,14 @@ import { Check, ExternalLink, Loader2 } from "lucide-react";
 import { Section } from "@/components/shell/primitives";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { startCheckout, useSubscription } from "@/lib/subscription";
+import {
+  cancelSubscription,
+  openBillingPortal,
+  resumeSubscription,
+  startCheckout,
+  useCheckoutReturn,
+  useSubscription,
+} from "@/lib/subscription";
 import { PLANS, type Plan } from "@/lib/plans";
 
 /**
@@ -66,8 +73,34 @@ const STATUS_LABEL: Record<string, string> = {
 
 export function BillingPanel() {
   const { subscription, loading, entitled, plan } = useSubscription();
+  const { settling } = useCheckoutReturn();
   const [pending, setPending] = useState<Plan | null>(null);
+  const [busy, setBusy] = useState<"cancel" | "resume" | "portal" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  const run = async (kind: "cancel" | "resume" | "portal") => {
+    setError(null);
+    setNotice(null);
+    setBusy(kind);
+    try {
+      if (kind === "portal") {
+        await openBillingPortal();
+        return;
+      }
+      if (kind === "cancel") {
+        await cancelSubscription();
+        setNotice("Your plan will end when the current period does. You keep access until then.");
+      } else {
+        await resumeSubscription();
+        setNotice("Your subscription will continue as normal.");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setBusy(null);
+    }
+  };
 
   const onSubscribe = async (next: Plan) => {
     setError(null);
@@ -116,6 +149,58 @@ export function BillingPanel() {
           <p className="text-sm text-muted-foreground">
             No active subscription. Choose a plan below to unlock BuildFlow.
           </p>
+        )}
+
+        {settling && (
+          <p role="status" className="mt-3 text-sm text-muted-foreground">
+            Payment received — activating your subscription. This usually takes a few seconds.
+          </p>
+        )}
+
+        {notice && (
+          <p role="status" className="mt-3 text-sm font-medium">
+            {notice}
+          </p>
+        )}
+
+        {entitled && subscription && (
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Button
+              variant="outline"
+              className="rounded-xl"
+              disabled={busy !== null}
+              onClick={() => run("portal")}
+            >
+              {busy === "portal" ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                  Opening…
+                </>
+              ) : (
+                "Manage payment method"
+              )}
+            </Button>
+
+            {subscription.cancel_at_period_end ? (
+              <Button
+                variant="outline"
+                className="rounded-xl"
+                disabled={busy !== null}
+                onClick={() => run("resume")}
+              >
+                {busy === "resume" ? "Resuming…" : "Resume subscription"}
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                className="rounded-xl"
+                disabled={busy !== null}
+                onClick={() => run("cancel")}
+              >
+                {busy === "cancel" ? "Cancelling…" : "Cancel subscription"}
+              </Button>
+            )}
+          </div>
         )}
       </Section>
 
