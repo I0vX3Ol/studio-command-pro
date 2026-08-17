@@ -20,6 +20,7 @@ import { currency } from "@/lib/format";
 import type { Dashboard, Project } from "@/lib/remote-data";
 import { buildForecast, fetchDashboard, fetchProjects } from "@/lib/remote-data";
 import { Download } from "lucide-react";
+import { RequireSubscription } from "@/lib/require-subscription";
 
 export const Route = createFileRoute("/app/analytics")({
   loader: async () => {
@@ -41,7 +42,11 @@ export const Route = createFileRoute("/app/analytics")({
       },
     ],
   }),
-  component: AnalyticsPage,
+  component: () => (
+    <RequireSubscription feature="Advanced analytics" minimumPlan="professional">
+      <AnalyticsPage />
+    </RequireSubscription>
+  ),
 });
 
 function AnalyticsPage() {

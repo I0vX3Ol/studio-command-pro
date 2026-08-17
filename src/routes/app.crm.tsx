@@ -19,6 +19,7 @@ import {
 import { currency } from "@/lib/format";
 import { createCustomer, fetchCustomers, fetchPipeline } from "@/lib/remote-data";
 import type { Customer, PipelineStage } from "@/lib/remote-data";
+import { RequireSubscription } from "@/lib/require-subscription";
 import {
   FileText,
   Image as ImageIcon,
@@ -50,7 +51,11 @@ export const Route = createFileRoute("/app/crm")({
       },
     ],
   }),
-  component: CRMPage,
+  component: () => (
+    <RequireSubscription feature="The CRM">
+      <CRMPage />
+    </RequireSubscription>
+  ),
 });
 
 function CRMPage() {

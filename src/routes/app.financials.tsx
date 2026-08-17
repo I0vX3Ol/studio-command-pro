@@ -23,6 +23,7 @@ import {
   fetchPurchaseOrders,
 } from "@/lib/remote-data";
 import { Download, Plus } from "lucide-react";
+import { RequireSubscription } from "@/lib/require-subscription";
 
 export const Route = createFileRoute("/app/financials")({
   loader: async () => {
@@ -46,7 +47,11 @@ export const Route = createFileRoute("/app/financials")({
       { property: "og:description", content: "AR/AP, cash flow, and job costing in one place." },
     ],
   }),
-  component: FinancialsPage,
+  component: () => (
+    <RequireSubscription feature="Financials" minimumPlan="professional">
+      <FinancialsPage />
+    </RequireSubscription>
+  ),
 });
 
 function FinancialsPage() {

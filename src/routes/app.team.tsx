@@ -18,6 +18,7 @@ import { initials } from "@/lib/format";
 import type { Employee, TimeOffEntry } from "@/lib/remote-data";
 import { createEmployee, fetchEmployees, fetchTimeOff } from "@/lib/remote-data";
 import { UserPlus } from "lucide-react";
+import { RequireSubscription } from "@/lib/require-subscription";
 
 export const Route = createFileRoute("/app/team")({
   loader: async () => {
@@ -39,7 +40,11 @@ export const Route = createFileRoute("/app/team")({
       },
     ],
   }),
-  component: TeamPage,
+  component: () => (
+    <RequireSubscription feature="Team and time-off management">
+      <TeamPage />
+    </RequireSubscription>
+  ),
 });
 
 function TeamPage() {

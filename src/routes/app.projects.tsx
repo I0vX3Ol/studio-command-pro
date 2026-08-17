@@ -34,6 +34,7 @@ import type {
   PunchItem,
 } from "@/lib/remote-data";
 import { Camera, Plus } from "lucide-react";
+import { RequireSubscription } from "@/lib/require-subscription";
 
 export const Route = createFileRoute("/app/projects")({
   loader: async () => {
@@ -62,7 +63,11 @@ export const Route = createFileRoute("/app/projects")({
       },
     ],
   }),
-  component: ProjectsPage,
+  component: () => (
+    <RequireSubscription feature="Project tracking">
+      <ProjectsPage />
+    </RequireSubscription>
+  ),
 });
 
 const WEEKS = 15;

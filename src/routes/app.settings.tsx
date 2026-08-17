@@ -22,6 +22,7 @@ import {
   updateProfile,
 } from "@/lib/remote-data";
 import { Copy, KeyRound, Plus } from "lucide-react";
+import { BillingPanel } from "@/components/billing/billing-panel";
 
 export const Route = createFileRoute("/app/settings")({
   loader: async () => {
@@ -200,34 +201,7 @@ function OrganizationTab() {
 }
 
 function BillingTab() {
-  const { org } = Route.useLoaderData() as { org: Organization | null };
-  return (
-    <>
-      <Section title="Current plan">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-sm text-muted-foreground">{org?.plan ?? "Starter"}</p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {org?.seats ?? 0} seat{(org?.seats ?? 0) === 1 ? "" : "s"} · no charges yet
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            className="rounded-xl"
-            onClick={() => toast.info("Paid plans are not enabled yet.")}
-          >
-            Compare plans
-          </Button>
-        </div>
-      </Section>
-
-      <Section title="Invoices">
-        <p className="py-6 text-center text-sm text-muted-foreground">
-          Billing is not switched on yet, so there is nothing to show here.
-        </p>
-      </Section>
-    </>
-  );
+  return <BillingPanel />;
 }
 
 function ApiKeysTab() {

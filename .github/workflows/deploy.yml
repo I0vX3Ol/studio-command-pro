@@ -40,6 +40,22 @@ jobs:
         run: bun audit
         continue-on-error: true
 
+      # Fails the build if a server-side secret ever reaches the browser bundle.
+      # Cheap, and it turns "we were careful" into something enforced.
+      - name: Assert no secrets in client bundle
+        run: |
+          set -e
+          FOUND=0
+          for PATTERN in sk_live sk_test whsec_ SERVICE_ROLE STRIPE_SECRET_KEY STRIPE_WEBHOOK_SECRET; do
+            if grep -rIl "$PATTERN" .output/public >/dev/null 2>&1; then
+              echo "::error::'$PATTERN' found in the client bundle (.output/public)"
+              grep -rIl "$PATTERN" .output/public || true
+              FOUND=1
+            fi
+          done
+          if [ "$FOUND" -ne 0 ]; then exit 1; fi
+          echo "No server-side secrets found in .output/public"
+
       - name: Upload build output
         uses: actions/upload-artifact@v4
         with:
@@ -59,6 +75,10 @@ jobs:
     permissions:
       contents: read
       deployments: write
+    env:
+      # The `secrets` context cannot be referenced from a step-level `if`, so it
+      # is resolved to a plain boolean here and tested via `env` below.
+      HAS_BILLING_SECRETS: ${{ secrets.STRIPE_SECRET_KEY != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -74,6 +94,99 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: .output/server
           command: deploy --config wrangler.json
+
+      # Billing config is pushed to the Worker's secret store after the deploy.
+      # It lives only in GitHub Actions secrets and Cloudflare — never in the
+      # repo, and never in the client bundle (only VITE_* vars are inlined, and
+      # the build job asserts the absence of these).
+      #
+      # Guarded on STRIPE_SECRET_KEY being set so the app still deploys before
+      # billing is configured. Until then the endpoints return 503 "Billing is
+      # not configured" rather than failing the whole release.
+      - name: Sync billing secrets to Worker
+        if: env.HAS_BILLING_SECRETS == 'true'
+        working-directory: .output/server
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          STRIPE_PRICE_STARTER: ${{ secrets.STRIPE_PRICE_STARTER }}
+          STRIPE_PRICE_PROFESSIONAL: ${{ secrets.STRIPE_PRICE_PROFESSIONAL }}
+          STRIPE_PRICE_ENTERPRISE: ${{ secrets.STRIPE_PRICE_ENTERPRISE }}
+          APP_ORIGIN: https://buildflow.nexudel.com
+        run: |
+          set -euo pipefail
+          # Built with jq from the environment and piped straight to wrangler, so
+          # no secret value is ever echoed, logged, or written to disk.
+          jq -n \
+            --arg sk  "$STRIPE_SECRET_KEY" \
+            --arg wh  "$STRIPE_WEBHOOK_SECRET" \
+            --arg su  "$SUPABASE_URL" \
+            --arg srk "$SUPABASE_SERVICE_ROLE_KEY" \
+            --arg ps  "$STRIPE_PRICE_STARTER" \
+            --arg pp  "$STRIPE_PRICE_PROFESSIONAL" \
+            --arg pe  "$STRIPE_PRICE_ENTERPRISE" \
+            --arg org "$APP_ORIGIN" \
+            '{
+               STRIPE_SECRET_KEY: $sk,
+               STRIPE_WEBHOOK_SECRET: $wh,
+               SUPABASE_URL: $su,
+               SUPABASE_SERVICE_ROLE_KEY: $srk,
+               STRIPE_PRICE_STARTER: $ps,
+               STRIPE_PRICE_PROFESSIONAL: $pp,
+               STRIPE_PRICE_ENTERPRISE: $pe,
+               APP_ORIGIN: $org
+             }' \
+          | npx --yes wrangler@3 secret bulk --config wrangler.json
+          echo "Billing secrets synced to the Worker."
+
+  deploy-preview:
+    name: Deploy PR preview
+    needs: build
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: worker-build
+          path: .output
+
+      - name: Upload preview version
+        id: preview
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: .output/server
+          command: versions upload --config wrangler.json --preview-alias pr-${{ github.event.number }}
+
+      - name: Comment preview URL on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const output = `${{ steps.preview.outputs.command-output }}`;
+            const match = output.match(/https:\/\/[a-z0-9-]+\.[a-z0-9-]+\.workers\.dev\S*/i);
+            const url = match ? match[0] : "(preview URL not found in wrangler output — check the Action log)";
+            const body = `**Preview deployed:** ${url}\n\nThis is a non-production version upload — it does not affect the live site.`;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c => c.user.type === "Bot" && c.body.startsWith("**Preview deployed:**"));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner: context.repo.owner, repo: context.repo.repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number, body });
+            }
 
   deploy-preview:
     name: Deploy PR preview

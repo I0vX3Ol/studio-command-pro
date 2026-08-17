@@ -22,6 +22,7 @@ import { currency } from "@/lib/format";
 import type { DocumentRow, Estimate, EstimateRevision } from "@/lib/remote-data";
 import { fetchDocuments, fetchEstimateRevisions, fetchEstimates } from "@/lib/remote-data";
 import { FileUp, Mail, Send, Sparkles, UploadCloud } from "lucide-react";
+import { RequireSubscription } from "@/lib/require-subscription";
 
 export const Route = createFileRoute("/app/estimating")({
   loader: async () => {
@@ -47,7 +48,11 @@ export const Route = createFileRoute("/app/estimating")({
       },
     ],
   }),
-  component: EstimatingPage,
+  component: () => (
+    <RequireSubscription feature="Estimating and change orders" minimumPlan="professional">
+      <EstimatingPage />
+    </RequireSubscription>
+  ),
 });
 
 function EstimatingPage() {

@@ -1,0 +1,29 @@
+# Cloudflare Worker bindings for local development.
+#
+# Copy to `.dev.vars` (gitignored) and fill in. NEVER commit real values.
+# In production these are pushed to the Worker by .github/workflows/deploy.yml
+# from GitHub Actions secrets — see src/server/billing/README.md.
+#
+# None of these are VITE_-prefixed, so none are inlined into the client bundle.
+# CI asserts their absence from .output/public on every build.
+
+# --- Stripe (server-only) ---------------------------------------------------
+# Use TEST-mode keys locally. Never put a live key in this file.
+STRIPE_SECRET_KEY=""
+STRIPE_WEBHOOK_SECRET=""
+
+# --- Stripe price ids -------------------------------------------------------
+# Not secret, but kept server-side so the browser cannot substitute one.
+# Live values (account acct_1U5VNTQvnGDiWSOu):
+STRIPE_PRICE_STARTER="price_1U5Y7JQvnGDiWSOu1QnI1lKp"
+STRIPE_PRICE_PROFESSIONAL="price_1U5Y7cQvnGDiWSOuVg2fDUKN"
+STRIPE_PRICE_ENTERPRISE="price_1U5Y7zQvnGDiWSOuqLoY10we"
+
+# --- Supabase (server-only) -------------------------------------------------
+# The service role key bypasses RLS and is what lets the webhook write
+# subscription rows. It must never appear in client code.
+SUPABASE_URL=""
+SUPABASE_SERVICE_ROLE_KEY=""
+
+# --- App ---------------------------------------------------------------------
+APP_ORIGIN="http://localhost:3000"

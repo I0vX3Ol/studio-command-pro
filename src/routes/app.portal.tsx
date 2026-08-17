@@ -9,6 +9,7 @@ import { currency } from "@/lib/format";
 import type { Customer, DocumentRow, Invoice, Project } from "@/lib/remote-data";
 import { fetchCustomers, fetchDocuments, fetchInvoices, fetchProjects } from "@/lib/remote-data";
 import { Download, ExternalLink, FileText } from "lucide-react";
+import { RequireSubscription } from "@/lib/require-subscription";
 
 export const Route = createFileRoute("/app/portal")({
   loader: async () => {
@@ -35,7 +36,11 @@ export const Route = createFileRoute("/app/portal")({
       },
     ],
   }),
-  component: PortalPage,
+  component: () => (
+    <RequireSubscription feature="The client portal">
+      <PortalPage />
+    </RequireSubscription>
+  ),
 });
 
 function PortalPage() {

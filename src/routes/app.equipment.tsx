@@ -20,6 +20,7 @@ import {
   fetchServiceLogs,
 } from "@/lib/remote-data";
 import { MapPin, Plus } from "lucide-react";
+import { RequireSubscription } from "@/lib/require-subscription";
 
 export const Route = createFileRoute("/app/equipment")({
   loader: async () => {
@@ -45,7 +46,11 @@ export const Route = createFileRoute("/app/equipment")({
       },
     ],
   }),
-  component: EquipmentPage,
+  component: () => (
+    <RequireSubscription feature="Equipment tracking" minimumPlan="professional">
+      <EquipmentPage />
+    </RequireSubscription>
+  ),
 });
 
 function EquipmentPage() {

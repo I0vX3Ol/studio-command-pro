@@ -9,6 +9,7 @@ import type { Integration } from "@/lib/remote-data";
 import { fetchIntegrations, setIntegrationStatus } from "@/lib/remote-data";
 import { Plug, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { RequireSubscription } from "@/lib/require-subscription";
 
 export const Route = createFileRoute("/app/integrations")({
   loader: () => fetchIntegrations(),
@@ -27,7 +28,11 @@ export const Route = createFileRoute("/app/integrations")({
       },
     ],
   }),
-  component: IntegrationsPage,
+  component: () => (
+    <RequireSubscription feature="Integrations" minimumPlan="enterprise">
+      <IntegrationsPage />
+    </RequireSubscription>
+  ),
 });
 
 function IntegrationsPage() {
