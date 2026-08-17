@@ -25,6 +25,12 @@ import {
 import { APP_KEY, STATEMENT_DESCRIPTOR_SUFFIX, isPlan } from "@/lib/plans";
 import { planForPriceId, priceIdForPlan, type PlanEnv } from "./plans";
 
+/**
+ * Trial length, matching the landing page's "14-day free trial" copy exactly.
+ * If that copy ever changes, this is the other half that has to change with it.
+ */
+const TRIAL_DAYS = 14;
+
 export type BillingEnv = StripeEnv &
   PlanEnv & {
     SUPABASE_URL?: string;
@@ -145,10 +151,18 @@ export async function handleCheckout(request: Request, env: BillingEnv): Promise
 
   const origin = env.APP_ORIGIN ?? new URL(request.url).origin;
 
+  // A Stripe customer id only exists once an org has completed a checkout
+  // before (the webhook is what writes it). No prior customer id means a
+  // genuine first subscription, which is the only case that earns the trial
+  // the marketing site promises — otherwise cancel-and-resubscribe would be a
+  // free way to keep resetting the clock.
+  const customerId = await existingCustomerId(env, orgId);
+  const trialDays = customerId ? undefined : TRIAL_DAYS;
+
   try {
     const session = await createCheckoutSession(env.STRIPE_SECRET_KEY, {
       priceId,
-      customerId: await existingCustomerId(env, orgId),
+      customerId,
       customerEmail: user.email,
       successUrl: `${origin}/app/settings?checkout=success`,
       cancelUrl: `${origin}/app/settings?checkout=cancelled`,
@@ -156,6 +170,7 @@ export async function handleCheckout(request: Request, env: BillingEnv): Promise
       metadata: { app: APP_KEY, org_id: orgId, user_id: user.id, plan },
       // Same user + plan within the same second should not double-create.
       idempotencyKey: `${orgId}:${plan}:${Math.floor(Date.now() / 1000)}`,
+      trialDays,
     });
 
     return json({ url: session.url });

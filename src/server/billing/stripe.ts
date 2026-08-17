@@ -96,6 +96,15 @@ export function createCheckoutSession(
     /** Echoed back on the webhook so we can attach the sub to the right tenant. */
     metadata: Record<string, string>;
     idempotencyKey?: string | undefined;
+    /**
+     * Grants a free trial of this length when set. Paired with
+     * `payment_method_collection: 'if_required'` so the customer is not asked
+     * for a card up front — this is what makes "no credit card required" in
+     * the marketing copy actually true. Callers must only pass this for a
+     * genuinely first-time subscriber; see handlers.ts for the eligibility
+     * check, which prevents a churn-and-resubscribe trial-abuse loop.
+     */
+    trialDays?: number | undefined;
   },
 ): Promise<CheckoutSession> {
   return stripeRequest<CheckoutSession>(
@@ -115,10 +124,19 @@ export function createCheckoutSession(
           ? { customer_email: params.customerEmail }
           : {}),
       metadata: params.metadata,
+      // Only meaningful together with a trial: without it Checkout always
+      // asks for a card, trial or not.
+      ...(params.trialDays ? { payment_method_collection: "if_required" } : {}),
       subscription_data: {
         metadata: params.metadata,
         // Per-app suffix so a customer can tell which product charged them.
         statement_descriptor: params.statementDescriptorSuffix,
+        ...(params.trialDays
+          ? {
+              trial_period_days: params.trialDays,
+              trial_settings: { end_behavior: { missing_payment_method: "cancel" } },
+            }
+          : {}),
       },
       allow_promotion_codes: true,
     },
