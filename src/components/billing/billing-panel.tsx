@@ -11,7 +11,7 @@ import {
   useCheckoutReturn,
   useSubscription,
 } from "@/lib/subscription";
-import { PLANS, type Plan } from "@/lib/plans";
+import { PLAN_COPY, PLANS, type Plan } from "@/lib/plans";
 
 /**
  * Plan selection and current subscription state.
@@ -21,46 +21,6 @@ import { PLANS, type Plan } from "@/lib/plans";
  * plan slug and looks the price up server-side, so the browser can never
  * influence what it is billed.
  */
-
-const PLAN_COPY: Record<Plan, { name: string; price: string; seats: string; features: string[] }> =
-  {
-    starter: {
-      name: "Starter",
-      price: "$149",
-      seats: "Up to 5 seats",
-      features: [
-        "Projects and scheduling",
-        "CRM and customers",
-        "Invoicing and expenses",
-        "Daily logs and punch lists",
-        "Email support",
-      ],
-    },
-    professional: {
-      name: "Professional",
-      price: "$299",
-      seats: "Up to 25 seats",
-      features: [
-        "Everything in Starter",
-        "Estimating and revisions",
-        "Change orders",
-        "Equipment and service logs",
-        "Financials and analytics",
-      ],
-    },
-    enterprise: {
-      name: "Enterprise",
-      price: "$599",
-      seats: "Unlimited seats",
-      features: [
-        "Everything in Professional",
-        "Integrations",
-        "API access",
-        "Audit logs",
-        "Dedicated onboarding",
-      ],
-    },
-  };
 
 const STATUS_LABEL: Record<string, string> = {
   active: "Active",

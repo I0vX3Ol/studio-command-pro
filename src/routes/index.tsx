@@ -2,10 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FaqSection } from "@/components/marketing/FaqSection";
+import { PLAN_COPY, PLANS } from "@/lib/plans";
 import {
   ArrowRight,
   Calculator,
   ChartNoAxesColumn,
+  Check,
   HardHat,
   Receipt,
   Shield,
@@ -82,6 +84,9 @@ function Landing() {
             </a>
             <a href="#platform" className="transition-colors hover:text-foreground">
               Platform
+            </a>
+            <a href="#pricing" className="transition-colors hover:text-foreground">
+              Pricing
             </a>
             <Link to="/app" className="transition-colors hover:text-foreground">
               Live demo
@@ -169,6 +174,77 @@ function Landing() {
             <Button asChild size="lg" className="h-12 rounded-xl px-6">
               <Link to="/signup">Start free trial</Link>
             </Button>
+          </div>
+        </section>
+
+        {/* Pricing. Copy comes from PLAN_COPY so this can never drift out of
+            step with what the billing panel shows or what Stripe charges. */}
+        <section id="pricing" className="border-t border-border bg-surface">
+          <div className="mx-auto max-w-6xl px-6 py-24">
+            <div className="max-w-2xl">
+              <h2 className="text-3xl font-semibold tracking-tight">
+                Pricing that scales with your crew.
+              </h2>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                Every plan includes the full platform — projects, CRM, invoicing and daily logs.
+                Upgrade as estimating, equipment and multi-crew coordination become part of the job.
+              </p>
+            </div>
+
+            <div className="mt-12 grid gap-6 md:grid-cols-3">
+              {PLANS.map((key) => {
+                const copy = PLAN_COPY[key];
+                const featured = key === "professional";
+
+                return (
+                  <div
+                    key={key}
+                    className={
+                      featured
+                        ? "panel relative flex flex-col p-8 ring-2 ring-primary"
+                        : "panel flex flex-col p-8"
+                    }
+                  >
+                    {featured && (
+                      <Badge className="absolute -top-3 left-8 rounded-full">Most popular</Badge>
+                    )}
+
+                    <h3 className="text-lg font-semibold tracking-tight">{copy.name}</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">{copy.tagline}</p>
+
+                    <p className="mt-6">
+                      <span className="text-4xl font-semibold tracking-tight">{copy.price}</span>
+                      <span className="text-sm text-muted-foreground"> / month</span>
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">{copy.seats}</p>
+
+                    <ul className="mt-6 flex-1 space-y-3">
+                      {copy.features.map((feature) => (
+                        <li key={feature} className="flex gap-2.5 text-sm">
+                          <Check
+                            className="mt-0.5 size-4 shrink-0 text-primary"
+                            aria-hidden="true"
+                          />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <Button
+                      asChild
+                      variant={featured ? "default" : "outline"}
+                      className="mt-8 h-11 rounded-xl"
+                    >
+                      <Link to="/signup">Start free trial</Link>
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+
+            <p className="mt-8 text-sm text-muted-foreground">
+              14-day free trial on every plan · No credit card required · Cancel anytime
+            </p>
           </div>
         </section>
       </main>
