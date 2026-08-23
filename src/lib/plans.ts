@@ -12,6 +12,15 @@
 export const APP_KEY = "buildflow" as const;
 
 /** Appended after the account's "NEXUDEL" prefix on card statements. */
+/**
+ * Intended card-statement descriptor for this app.
+ *
+ * Not sent with the Checkout Session: Stripe does not accept
+ * `subscription_data.statement_descriptor` and rejects the whole request
+ * if you try. For subscriptions this must be configured on the Stripe
+ * Product instead. Kept here as the single source of truth for what that
+ * value should be.
+ */
 export const STATEMENT_DESCRIPTOR_SUFFIX = "BUILDFLOW";
 
 export const PLANS = ["starter", "professional", "enterprise"] as const;

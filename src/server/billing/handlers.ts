@@ -23,7 +23,7 @@ import {
   type StripeEvent,
   type StripeSubscription,
 } from "./stripe";
-import { APP_KEY, STATEMENT_DESCRIPTOR_SUFFIX, isPlan } from "@/lib/plans";
+import { APP_KEY, isPlan } from "@/lib/plans";
 import { planForPriceId, priceIdForPlan, type PlanEnv } from "./plans";
 
 /**
@@ -167,7 +167,6 @@ export async function handleCheckout(request: Request, env: BillingEnv): Promise
       customerEmail: user.email,
       successUrl: `${origin}/app/settings?checkout=success`,
       cancelUrl: `${origin}/app/settings?checkout=cancelled`,
-      statementDescriptorSuffix: STATEMENT_DESCRIPTOR_SUFFIX,
       metadata: { app: APP_KEY, org_id: orgId, user_id: user.id, plan },
       // Same user + plan within the same second should not double-create.
       idempotencyKey: `${orgId}:${plan}:${Math.floor(Date.now() / 1000)}`,
